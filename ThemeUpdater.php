@@ -1,8 +1,10 @@
 <?php
 /**
- * Small lib to make theme updates from private GitLab repos possible.
- * The safest way might be to create the access_token for an external user with the role »reporter«, who
- * has only access to the theme repo. Project features like wiki and issues can be hidden from external users.
+ * Lib to make theme updates from private GitLab repos possible.
+ * The safest way might be to create the access_token for an
+ * external user with the role »reporter«, who has only access to
+ * the theme repo. Project features like wiki and issues can be
+ * hidden from external users.
  *
  * @package Moenus\GitLabUpdater
  * @author  Florian Brinkmann

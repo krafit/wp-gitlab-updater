@@ -1,8 +1,10 @@
 <?php
 /**
  * Lib to make plugin updates from private GitLab repos possible.
- * The safest way might be to create the access_token for an external user with the role »reporter«, who
- * has only access to the plugin repo. Project features like wiki and issues can be hidden from external users.
+ * The safest way might be to create the access_token for an
+ * external user with the role »reporter«, who has only access to
+ * the plugin repo. Project features like wiki and issues can be
+ * hidden from external users.
  *
  * @package Moenus\GitLabUpdater
  * @author  Florian Brinkmann
