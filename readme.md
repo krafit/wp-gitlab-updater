@@ -3,6 +3,7 @@
 You can use this as a WordPress plugin (for example, if you have 
 multiple themes and/or plugins in one WP installation, which 
 should be updated with the script), or include it directly in a theme or plugin.
+The script uses the GitLab tags to check for a new version.
 
 ## Usage as a WordPress plugin
 
