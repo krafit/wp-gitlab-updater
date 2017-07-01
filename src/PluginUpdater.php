@@ -13,20 +13,18 @@
 namespace Moenus\GitLabUpdater;
 
 /**
+ * Include UpdaterBase class.
+ */
+require_once 'UpdaterBase.php';
+
+/**
  * Class PluginUpdater
  *
  * Class for handling plugin updates from GitLab repo.
  *
  * @package Moenus\GitLabUpdater
  */
-class PluginUpdater {
-	/**
-	 * Slug of plugin to get updates for.
-	 *
-	 * @var string
-	 */
-	private $plugin_slug;
-
+class PluginUpdater extends UpdaterBase {
 	/**
 	 * Base name of plugin (for example, example-plugin/example-plugin.php).
 	 *
@@ -35,31 +33,17 @@ class PluginUpdater {
 	private $plugin_base_name;
 
 	/**
-	 * Personal access token, which needs the »api« scope.
-	 *
-	 * @var string
-	 */
-	private $access_token;
-
-	/**
-	 * GitLab repo API URL. For example: https://gitlab.com/api/v4/projects/user%2FprojectName/
-	 *
-	 * @var string
-	 */
-	private $gitlab_repo_api_url;
-
-	/**
 	 * PluginUpdater constructor.
 	 *
-	 * @param string $plugin_slug           Slug of plugin to get updates for.
+	 * @param string $slug                  Slug of plugin to get updates for.
 	 * @param string $plugin_base_name      Relative path of main file. For example:
 	 *                                      multilingual-press/multilingual-press.php.
 	 * @param string $access_token          Personal access token, which needs the »api« scope.
 	 * @param string $gitlab_repo_api_url   GitLab repo API URL. For example:
 	 *                                      https://gitlab.com/api/v4/projects/user%2FprojectName/.
 	 */
-	public function __construct( $plugin_slug, $plugin_base_name, $access_token, $gitlab_repo_api_url ) {
-		$this->plugin_slug      = $plugin_slug;
+	public function __construct( $slug, $plugin_base_name, $access_token, $gitlab_repo_api_url ) {
+		$this->slug             = $slug;
 		$this->plugin_base_name = $plugin_base_name;
 		$this->access_token     = $access_token;
 
@@ -167,8 +151,8 @@ class PluginUpdater {
 				/**
 				 * Build stdClass
 				 */
-				$info              = new stdClass();
-				$info->slug        = $this->plugin_slug;
+				$info              = new \stdClass();
+				$info->slug        = $this->slug;
 				$info->plugin      = $this->plugin_base_name;
 				$info->package     = $plugin_package;
 				$info->new_version = $latest_version;
@@ -180,59 +164,5 @@ class PluginUpdater {
 		} // End if().
 
 		return $transient;
-	}
-
-	/**
-	 * Fetch data of latest plugin version.
-	 *
-	 * @return array|WP_Error Array with data of the latest plugin version or WP_Error.
-	 */
-	private function fetch_tags_from_repo() {
-		$request_url = "$this->gitlab_repo_api_url/repository/tags/?private_token=$this->access_token";
-		$request     = wp_safe_remote_get( $request_url );
-
-		return $request;
-	}
-
-	/**
-	 * Renames the source directory and returns new $source.
-	 *
-	 * @param string $source        URL of the tmp folder with the plugin files.
-	 * @param string $remote_source Source URL on remote.
-	 * @param object $wp_upgrader   WP_Upgrader instance.
-	 * @param array  $args          Additional args.
-	 *
-	 * @return string
-	 */
-	private function filter_source_name( $source, $remote_source, $wp_upgrader, $args ) {
-		global $wp_filesystem;
-
-		/**
-		 * Check if the remote source directory exists.
-		 */
-		if ( $wp_filesystem->exists( $remote_source ) ) {
-			/**
-			 * Create a folder with plugin slug as name inside the folder.
-			 */
-			$upgrade_plugin_folder = $remote_source . "/$this->plugin_slug";
-			$wp_filesystem->mkdir( $upgrade_plugin_folder );
-
-			/**
-			 * Copy files from $source in new $upgrade_plugin_folder
-			 */
-			copy_dir( $source, $upgrade_plugin_folder );
-
-			/**
-			 * Remove the old $source directory.
-			 */
-			$wp_filesystem->delete( $source, true );
-
-			/**
-			 * Set new folder as $source.
-			 */
-			$source = $upgrade_plugin_folder;
-		}
-
-		return $source;
 	}
 }

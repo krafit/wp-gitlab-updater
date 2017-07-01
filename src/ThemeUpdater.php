@@ -13,44 +13,28 @@
 namespace Moenus\GitLabUpdater;
 
 /**
+ * Include UpdaterBase class.
+ */
+require_once 'UpdaterBase.php';
+
+/**
  * Class ThemeUpdater
  *
  * Class for handling theme updates from GitLab repo.
  *
  * @package Moenus\GitLabUpdater
  */
-class ThemeUpdater {
-	/**
-	 * Slug of theme to get updates for.
-	 *
-	 * @var string
-	 */
-	private $theme_slug;
-
-	/**
-	 * Personal access token, which needs the »api« scope.
-	 *
-	 * @var string
-	 */
-	private $access_token;
-
-	/**
-	 * GitLab repo API URL. For example: https://gitlab.com/api/v4/projects/user%2FprojectName/
-	 *
-	 * @var string
-	 */
-	private $gitlab_repo_api_url;
-
+class ThemeUpdater extends UpdaterBase {
 	/**
 	 * ThemeUpdater constructor.
 	 *
-	 * @param string $theme_slug          Slug of theme to get updates for.
+	 * @param string $slug                Slug of theme to get updates for.
 	 * @param string $access_token        Personal access token, which needs the »api« scope.
 	 * @param string $gitlab_repo_api_url GitLab repo API URL. For example:
 	 *                                    https://gitlab.com/api/v4/projects/user%2FprojectName/.
 	 */
-	public function __construct( $theme_slug, $access_token, $gitlab_repo_api_url ) {
-		$this->theme_slug   = $theme_slug;
+	public function __construct( $slug, $access_token, $gitlab_repo_api_url ) {
+		$this->slug         = $slug;
 		$this->access_token = $access_token;
 
 		/**
@@ -80,7 +64,7 @@ class ThemeUpdater {
 			/**
 			 * Check if the currently updated theme matches our theme slug.
 			 */
-			if ( $args['theme'] === $this->theme_slug ) {
+			if ( $args['theme'] === $this->slug ) {
 				$source = $this->filter_source_name( $source, $remote_source, $wp_upgrader, $args );
 			}
 
@@ -140,7 +124,7 @@ class ThemeUpdater {
 		/**
 		 * Check if new version is available.
 		 */
-		if ( version_compare( $transient->checked[ $this->theme_slug ], $latest_version, '<' ) ) {
+		if ( version_compare( $transient->checked[ $this->slug ], $latest_version, '<' ) ) {
 			/**
 			 * Get the package URL.
 			 */
@@ -157,66 +141,12 @@ class ThemeUpdater {
 				/**
 				 * Add data to response array.
 				 */
-				$transient->response[ $this->theme_slug ]['theme']       = $this->theme_slug;
-				$transient->response[ $this->theme_slug ]['new_version'] = $latest_version;
-				$transient->response[ $this->theme_slug ]['package']     = $theme_package;
+				$transient->response[ $this->slug ]['theme']       = $this->slug;
+				$transient->response[ $this->slug ]['new_version'] = $latest_version;
+				$transient->response[ $this->slug ]['package']     = $theme_package;
 			}
 		} // End if().
 
 		return $transient;
-	}
-
-	/**
-	 * Fetch data of latest theme version.
-	 *
-	 * @return array|WP_Error Array with data of the latest theme version or WP_Error.
-	 */
-	private function fetch_tags_from_repo() {
-		$request_url = "$this->gitlab_repo_api_url/repository/tags/?private_token=$this->access_token";
-		$request     = wp_safe_remote_get( $request_url );
-
-		return $request;
-	}
-
-	/**
-	 * Renames the source directory and returns new $source.
-	 *
-	 * @param string $source        URL of the tmp folder with the theme files.
-	 * @param string $remote_source Source URL on remote.
-	 * @param object $wp_upgrader   WP_Upgrader instance.
-	 * @param array  $args          Additional args.
-	 *
-	 * @return string
-	 */
-	private function filter_source_name( $source, $remote_source, $wp_upgrader, $args ) {
-		global $wp_filesystem;
-
-		/**
-		 * Check if the remote source directory exists.
-		 */
-		if ( $wp_filesystem->exists( $remote_source ) ) {
-			/**
-			 * Create a folder with theme slug as name inside the folder.
-			 */
-			$upgrade_theme_folder = $remote_source . "/$this->theme_slug";
-			$wp_filesystem->mkdir( $upgrade_theme_folder );
-
-			/**
-			 * Copy files from $source in new $upgrade_theme_folder
-			 */
-			copy_dir( $source, $upgrade_theme_folder );
-
-			/**
-			 * Remove the old $source directory.
-			 */
-			$wp_filesystem->delete( $source, true );
-
-			/**
-			 * Set new folder as $source.
-			 */
-			$source = $upgrade_theme_folder;
-		}
-
-		return $source;
 	}
 }
