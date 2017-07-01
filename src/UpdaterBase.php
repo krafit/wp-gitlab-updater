@@ -50,7 +50,7 @@ class UpdaterBase {
 	/**
 	 * Renames the source directory and returns new $source.
 	 *
-	 * @param string $source        URL of the tmp folder with the theme files.
+	 * @param string $source        URL of the tmp folder with the theme or plugin files.
 	 * @param string $remote_source Source URL on remote.
 	 * @param object $wp_upgrader   WP_Upgrader instance.
 	 * @param array  $args          Additional args.
@@ -65,7 +65,7 @@ class UpdaterBase {
 		 */
 		if ( $wp_filesystem->exists( $remote_source ) ) {
 			/**
-			 * Create a folder with theme slug as name inside the folder.
+			 * Create a folder with slug as name inside the folder.
 			 */
 			$upgrade_theme_folder = $remote_source . "/$this->slug";
 			$wp_filesystem->mkdir( $upgrade_theme_folder );
