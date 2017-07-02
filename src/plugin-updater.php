@@ -38,7 +38,7 @@ class PluginUpdater extends UpdaterBase {
 	 * @param string $slug                  Slug of plugin to get updates for.
 	 * @param string $plugin_base_name      Relative path of main file. For example:
 	 *                                      multilingual-press/multilingual-press.php.
-	 * @param string $access_token          Personal access token, which needs the »api« scope.
+	 * @param string $access_token          Personal access token, which needs the »api« and »read_registry« scope.
 	 * @param string $gitlab_repo_api_url   GitLab repo API URL. For example:
 	 *                                      https://gitlab.com/api/v4/projects/user%2FprojectName/.
 	 */

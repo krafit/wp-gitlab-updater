@@ -24,7 +24,8 @@ if ( class_exists( '\Moenus\GitLabUpdater\ThemeUpdater' ) ) {
 }
 ```
 * `slug` has to be the name of the theme folder.
-* `access_token` is the GitLab API access token. The safest way 
+* `access_token` is the GitLab API access token 
+(needs »api« and »read_registry« scope). The safest way 
 might be to create the access token for an external user with 
 the role »reporter«, who has only access to the theme repo. 
 Project features like wiki and issues can be hidden from external users.

@@ -29,7 +29,7 @@ class ThemeUpdater extends UpdaterBase {
 	 * ThemeUpdater constructor.
 	 *
 	 * @param string $slug                Slug of theme to get updates for.
-	 * @param string $access_token        Personal access token, which needs the »api« scope.
+	 * @param string $access_token        Personal access token, which needs the »api« and »read_registry« scope.
 	 * @param string $gitlab_repo_api_url GitLab repo API URL. For example:
 	 *                                    https://gitlab.com/api/v4/projects/user%2FprojectName/.
 	 */

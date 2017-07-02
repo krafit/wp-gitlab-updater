@@ -22,7 +22,7 @@ class UpdaterBase {
 	protected $slug;
 
 	/**
-	 * Personal access token, which needs the »api« scope.
+	 * Personal access token, which needs the »api« and »read_registry« scope.
 	 *
 	 * @var string
 	 */
