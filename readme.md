@@ -29,8 +29,10 @@ might be to create the access token for an external user with
 the role »reporter«, who has only access to the theme repo. 
 Project features like wiki and issues can be hidden from external users.
 * `gitlab_repo_api_url` needs to be the API URL to the repo. 
-This could look something like that: `https://gitlab.com/api/v4/projects/username%2Fproject/` 
-— notice the encoded `username/project` part (replace `/` with `%2F`).
+This could look something like that: `https://gitlab.com/api/v4/projects/(username|group)%2Fproject/` 
+— notice the encoded `(username|group)/project` part (replace `/` with `%2F`). If the project is part
+of a group, use the group name instead of the username (the form that is displayed
+in the URL when visiting the project in GitLab).
 
 ### With a plugin
 
@@ -54,15 +56,15 @@ if ( class_exists( '\Moenus\GitLabUpdater\PluginUpdater' ) ) {
 
 ### Inside a theme
 
-To bundle it into a theme, you can just grab the `src/ThemeUpdater.php` 
-and `src/UpdaterBase.php` and put it into your theme, for example, 
+To bundle it into a theme, you can just grab the `src/theme-updater.php` 
+and `src/updater-base.php` and put it into your theme, for example, 
 into a `wp-gitlab-updater` folder. After that, you can call it like that:
 
 ```php
 /**
  * Include the file with the ThemeUpdater class.
  */
- require_once 'wp-gitlab-updater/ThemeUpdater.php';
+ require_once 'wp-gitlab-updater/theme-updater.php';
   
 /**
  * Init the theme updater.
@@ -74,14 +76,14 @@ The params are the same as explained in the _Usage as a WordPress plugin_ part.
 
 ### Inside a plugin
 
-For that, take the `src/PluginUpdater.php` and `src/UpdaterBase.php`, 
+For that, take the `src/plugin-updater.php` and `src/updater-base.php`, 
 put it into your plugin and call it:
 
 ```php
 /**
  * Include the file with the PluginUpdater class.
  */
- require_once 'wp-gitlab-updater/PluginUpdater.php';
+ require_once 'wp-gitlab-updater/plugin-updater.php';
   
 /**
  * Init the plugin updater with the plugin base name.

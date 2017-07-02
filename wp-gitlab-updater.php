@@ -31,5 +31,5 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Include PluginUpdater and ThemeUpdater class.
  */
-require_once 'src/PluginUpdater.php';
-require_once 'src/ThemeUpdater.php';
+require_once 'src/plugin-updater.php';
+require_once 'src/theme-updater.php';

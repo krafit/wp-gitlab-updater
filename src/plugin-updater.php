@@ -15,7 +15,7 @@ namespace Moenus\GitLabUpdater;
 /**
  * Include UpdaterBase class.
  */
-require_once 'UpdaterBase.php';
+require_once 'updater-base.php';
 
 /**
  * Class PluginUpdater
