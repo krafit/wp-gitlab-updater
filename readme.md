@@ -16,14 +16,12 @@ update feature for your plugins or themes, you need to modify its code a bit:
 To enable theme updates, you can put the following code into 
 the functions.php (or a related file):
 ```php
-add_action( 'plugins_loaded', function () {
-    if ( class_exists( '\Moenus\GitLabUpdater\ThemeUpdater' ) ) {
-        /**
-         * Init the theme updater with the theme slug.
-         */
-        new Moenus\GitLabUpdater\ThemeUpdater( 'slug', 'access_token', 'gitlab_repo_api_url' );
-    }
-} );
+if ( class_exists( '\Moenus\GitLabUpdater\ThemeUpdater' ) ) {
+    /**
+     * Init the theme updater with the theme slug.
+     */
+    new Moenus\GitLabUpdater\ThemeUpdater( 'slug', 'access_token', 'gitlab_repo_api_url' );
+}
 ```
 * `slug` has to be the name of the theme folder.
 * `access_token` is the GitLab API access token 
