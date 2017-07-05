@@ -7,15 +7,17 @@
  * @license   GPL-2.0+
  * @link      https://florianbrinkmann.com/en/
  * @copyright 2017 Florian Brinkmann
- *
- * @wordpress-plugin
+ */
+
+/**
  * Plugin Name:       GitLab updater
  * Plugin URI:        https://github.com/Moenus/wp-gitlab-updater
- * Description:       Lib for updating themes and plugins from private GitLab repos.
+ * Description:       Plugin for updating themes and plugins from private GitLab repos.
  * Version:           1.0.0
  * Author:            Florian Brinkmann
  * Author URI:        https://florianbrinkmann.com/en/
  * License:           GPL-2.0+
+ * Network:           true
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * GitHub Plugin URI: Moenus/wp-gitlab-updater
  */
