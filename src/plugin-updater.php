@@ -60,7 +60,37 @@ class PluginUpdater extends UpdaterBase {
 			$transient = $this->plugin_update( $transient );
 
 			return $transient;
-		}, 15 );
+		} );
+
+		/**
+		 * Check for plugins with the same slug (for example from W.org) and remove
+		 * update notifications for them.
+		 *
+		 * For whatever reason, it seems to be working better here in an anonymous function
+		 * rather than in a method…
+		 */
+		add_filter( 'site_transient_update_plugins', function ( $transient ) {
+			/**
+			 * Check if we have an update for a plugin with the same slug from W.org
+			 * and remove it.
+			 *
+			 * At first, we loop the available updates.
+			 */
+			foreach ( $transient->response as $key => $value ) {
+				/**
+				 * Check if we have a plugin with the same slug and another package URL
+				 * than our GitLab URL.
+				 */
+				if ( $this->slug === $value->slug && false === strpos( $value->package, $this->gitlab_repo_api_url ) ) {
+					/**
+					 * Unset the response key for that plugin.
+					 */
+					unset( $transient->response[ $key ] );
+				}
+			}
+
+			return $transient;
+		} );
 
 		/**
 		 * Before the files are copied to wp-content/plugins, we need to rename the
