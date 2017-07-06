@@ -49,7 +49,7 @@ add_action( 'plugins_loaded', function () {
     }
 } );
 ```
-* `slug` has to be the name of the theme folder.
+* `slug` has to be the name of the plugin folder.
 * `plugin_base_name` needs to be the base name of the plugin 
 (folder and main file. For example `svg-social-menu/svg-social-menu.php`).
 * `access_token` is the GitLab API access token (see _With a theme_ for more info).
