@@ -9,7 +9,7 @@ updated readme for details.**
 
 * Check to prevent crash with plugin and theme updates with same slug from W.org or other sources.
 * GitHub updater support.
-* First draft of settings page. Could be made a little more 
+* Settings page. 
 
 ### Changed
 
