@@ -13,6 +13,13 @@
 namespace Moenus\GitLabUpdater;
 
 /**
+ * If this file is called directly, abort.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
  * Include UpdaterBase class.
  */
 require_once 'updater-base.php';
@@ -26,21 +33,50 @@ require_once 'updater-base.php';
  */
 class ThemeUpdater extends UpdaterBase {
 	/**
+	 * Data of themes which should get GitLab updates.
+	 *
+	 * @var array
+	 */
+	protected $theme_data = [];
+
+	/**
 	 * ThemeUpdater constructor.
 	 *
-	 * @param string $slug                Slug of theme to get updates for.
-	 * @param string $access_token        Personal access token, which needs the »api« and »read_registry« scope.
-	 * @param string $gitlab_repo_api_url GitLab repo API URL. For example:
-	 *                                    https://gitlab.com/api/v4/projects/user%2FprojectName/.
+	 * @param array $args                    {
+	 *                                       Argument array.
+	 *
+	 * @type string $slug                    Slug of theme to get updates for.
+	 * @type string $access_token            Personal access token, which needs the »api« and »read_registry« scope.
+	 * @type string $gitlab_url              GitLab URL. For example: https://gitlab.com/
+	 * @type string $repo                    GitLab repo name with user or group.
+	 *                                       For example: username/repo or group/repo
+	 * }
 	 */
-	public function __construct( $slug, $access_token, $gitlab_repo_api_url ) {
-		$this->slug         = $slug;
-		$this->access_token = $access_token;
+	public function __construct( $args = [] ) {
+		/**
+		 * Set theme data.
+		 */
+		$this->theme_data = (array) get_option( 'wp-gitlab-updater-themes' );
 
 		/**
-		 * Remove trailing slash from Repo URL (if set).
+		 * Check if we have values.
 		 */
-		$this->gitlab_repo_api_url = untrailingslashit( $gitlab_repo_api_url );
+		if ( isset( $args['slug'] ) && isset( $args['access_token'] ) && isset( $args['gitlab_url'] ) && isset( $args['repo'] ) ) {
+			/**
+			 * Create array to insert them into theme_data.
+			 */
+			$tmp_array = [
+				'settings-array-key' => $args['slug'],
+				'access-token'       => $args['access_token'],
+				'gitlab-url'         => untrailingslashit( $args['gitlab_url'] ),
+				'repo'               => str_replace( '/', '%2F', $args['repo'] ),
+			];
+
+			/**
+			 * Insert it.
+			 */
+			$this->theme_data[ $args['slug'] ] = $tmp_array;
+		} // End if().
 
 		/**
 		 * Hook into pre_set_site_transient_update_themes to modify the update_themes
@@ -60,22 +96,28 @@ class ThemeUpdater extends UpdaterBase {
 		 * rather than in a method…
 		 */
 		add_filter( 'site_transient_update_themes', function ( $transient ) {
+			if ( empty ( $transient->response ) ) {
+				return $transient;
+			}
+
 			/**
-			 * Check if we have an update for a plugin with the same slug from W.org
+			 * Check if we have an update for a theme with the same slug from W.org
 			 * and remove it.
 			 *
-			 * At first, we loop the available updates.
+			 * At first, we loop the GitLab updater themes.
 			 */
-			foreach ( $transient->response as $key => $value ) {
+			foreach ( $this->theme_data as $theme ) {
+				$theme_slug = $theme['settings-array-key'];
+
 				/**
-				 * Check if we have a plugin with the same slug and another package URL
+				 * Check if we have a theme with the same slug and another package URL
 				 * than our GitLab URL.
 				 */
-				if ( $this->slug === $key && false === strpos( $value['package'], $this->gitlab_repo_api_url ) ) {
+				if ( array_key_exists( $theme_slug, $transient->response ) && false === strpos( $transient->response[ $theme_slug ]['package'], $theme['gitlab-url'] ) ) {
 					/**
-					 * Unset the response key for that plugin.
+					 * Unset the response key for that theme.
 					 */
-					unset( $transient->response[ $key ] );
+					unset( $transient->response[ $theme_slug ] );
 				}
 			}
 
@@ -91,11 +133,13 @@ class ThemeUpdater extends UpdaterBase {
 		 * (so everything but matching the theme slug).
 		 */
 		add_filter( 'upgrader_source_selection', function ( $source, $remote_source, $wp_upgrader, $args ) {
-			/**
-			 * Check if the currently updated theme matches our theme slug.
-			 */
-			if ( $args['theme'] === $this->slug ) {
-				$source = $this->filter_source_name( $source, $remote_source, $wp_upgrader, $args );
+			foreach ( $this->theme_data as $theme ) {
+				/**
+				 * Check if the currently updated theme matches our theme slug.
+				 */
+				if ( $args['theme'] === $theme['settings-array-key'] ) {
+					$source = $this->filter_source_name( $source, $remote_source, $theme['settings-array-key'] );
+				}
 			}
 
 			return $source;
@@ -114,68 +158,77 @@ class ThemeUpdater extends UpdaterBase {
 			return $transient;
 		}
 
-		/**
-		 * Get tag list from GitLab repo.
-		 */
-		$request = $this->fetch_tags_from_repo();
-
-		/**
-		 * Get response code of the request.
-		 */
-		$response_code = wp_remote_retrieve_response_code( $request );
-
-		/**
-		 * Check if request is not valid and return the $transient.
-		 * Otherwise get the data body.
-		 */
-		if ( is_wp_error( $request ) || 200 !== $response_code ) {
-			return $transient;
-		} else {
-			$response = wp_remote_retrieve_body( $request );
-		}
-
-		/**
-		 * Decode json.
-		 */
-		$data = json_decode( $response );
-
-		/**
-		 * Check if we have no tags and return the transient.
-		 */
-		if ( empty( $data ) ) {
-			return $transient;
-		}
-
-		/**
-		 * Get the latest tag.
-		 */
-		$latest_version = $data[0]->name;
-
-		/**
-		 * Check if new version is available.
-		 */
-		if ( version_compare( $transient->checked[ $this->slug ], $latest_version, '<' ) ) {
+		foreach ( $this->theme_data as $theme ) {
 			/**
-			 * Get the package URL.
+			 * Get data from array.
 			 */
-			$theme_package = "$this->gitlab_repo_api_url/repository/archive.zip?sha=$latest_version&private_token=$this->access_token";
+			$gitlab_url   = $theme['gitlab-url'];
+			$repo         = $theme['repo'];
+			$access_token = $theme['access-token'];
 
 			/**
-			 * Check the response.
+			 * Get tag list from GitLab repo.
 			 */
-			$response      = wp_safe_remote_get( $theme_package );
-			$response_code = wp_remote_retrieve_response_code( $response );
-			if ( is_wp_error( $response ) || 200 !== $response_code ) {
+			$request = $this->fetch_tags_from_repo( $gitlab_url, $repo, $access_token );
+
+			/**
+			 * Get response code of the request.
+			 */
+			$response_code = wp_remote_retrieve_response_code( $request );
+
+			/**
+			 * Check if request is not valid and return the $transient.
+			 * Otherwise get the data body.
+			 */
+			if ( is_wp_error( $request ) || 200 !== $response_code ) {
 				return $transient;
 			} else {
-				/**
-				 * Add data to response array.
-				 */
-				$transient->response[ $this->slug ]['theme']       = $this->slug;
-				$transient->response[ $this->slug ]['new_version'] = $latest_version;
-				$transient->response[ $this->slug ]['package']     = $theme_package;
+				$response = wp_remote_retrieve_body( $request );
 			}
-		} // End if().
+
+			/**
+			 * Decode json.
+			 */
+			$data = json_decode( $response );
+
+			/**
+			 * Check if we have no tags and return the transient.
+			 */
+			if ( empty( $data ) ) {
+				return $transient;
+			}
+
+			/**
+			 * Get the latest tag.
+			 */
+			$latest_version = $data[0]->name;
+
+			/**
+			 * Check if new version is available.
+			 */
+			if ( version_compare( $transient->checked[ $theme['settings-array-key'] ], $latest_version, '<' ) ) {
+				/**
+				 * Get the package URL.
+				 */
+				$theme_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
+
+				/**
+				 * Check the response.
+				 */
+				$response      = wp_safe_remote_get( $theme_package );
+				$response_code = wp_remote_retrieve_response_code( $response );
+				if ( is_wp_error( $response ) || 200 !== $response_code ) {
+					return $transient;
+				} else {
+					/**
+					 * Add data to response array.
+					 */
+					$transient->response[ $theme['settings-array-key'] ]['theme']       = $theme['settings-array-key'];
+					$transient->response[ $theme['settings-array-key'] ]['new_version'] = $latest_version;
+					$transient->response[ $theme['settings-array-key'] ]['package']     = $theme_package;
+				}
+			} // End if().
+		} // End foreach().
 
 		return $transient;
 	}

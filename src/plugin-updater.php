@@ -13,6 +13,13 @@
 namespace Moenus\GitLabUpdater;
 
 /**
+ * If this file is called directly, abort.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
  * Include UpdaterBase class.
  */
 require_once 'updater-base.php';
@@ -26,31 +33,57 @@ require_once 'updater-base.php';
  */
 class PluginUpdater extends UpdaterBase {
 	/**
-	 * Base name of plugin (for example, example-plugin/example-plugin.php).
+	 * Data of plugins which should get GitLab updates.
 	 *
-	 * @var string
+	 * @var array
 	 */
-	private $plugin_base_name;
+	protected $plugin_data = [];
 
 	/**
 	 * PluginUpdater constructor.
 	 *
-	 * @param string $slug                  Slug of plugin to get updates for.
-	 * @param string $plugin_base_name      Relative path of main file. For example:
-	 *                                      multilingual-press/multilingual-press.php.
-	 * @param string $access_token          Personal access token, which needs the »api« and »read_registry« scope.
-	 * @param string $gitlab_repo_api_url   GitLab repo API URL. For example:
-	 *                                      https://gitlab.com/api/v4/projects/user%2FprojectName/.
+	 * @param           $args                {
+	 *                                       Argument array.
+	 *
+	 * @type string     $slug                Slug of plugin to get updates for.
+	 * @type string     $plugin_base_name    Relative path of main file. For example:
+	 *                                       multilingual-press/multilingual-press.php.
+	 * @type string     $access_token        Personal access token, which needs the »api« and »read_registry« scope.
+	 * @type string     $gitlab_url          GitLab URL. For example: https://gitlab.com/.
+	 * @type string     $repo                GitLab repo name with user or group.
+	 *                                       For example: username/repo or group/repo
+	 * }
+	 *
 	 */
-	public function __construct( $slug, $plugin_base_name, $access_token, $gitlab_repo_api_url ) {
-		$this->slug             = $slug;
-		$this->plugin_base_name = $plugin_base_name;
-		$this->access_token     = $access_token;
+	public function __construct( $args = [] ) {
+		/**
+		 * Set plugin data.
+		 */
+		if ( false !== get_option( 'wp-gitlab-updater-plugins' ) ) {
+			$this->plugin_data = (array) get_option( 'wp-gitlab-updater-plugins' );
+
+		}
 
 		/**
-		 * Remove trailing slash from Repo URL (if set).
+		 * Check if we have values.
 		 */
-		$this->gitlab_repo_api_url = untrailingslashit( $gitlab_repo_api_url );
+		if ( isset( $args['slug'] ) && isset( $args['plugin_base_name'] ) && isset( $args['access_token'] ) && isset( $args['gitlab_url'] ) && isset( $args['repo'] ) ) {
+			/**
+			 * Create array to insert them into plugin_data.
+			 */
+			$tmp_array = [
+				'settings-array-key' => $args['plugin_base_name'],
+				'slug'               => $args['slug'],
+				'access-token'       => $args['access_token'],
+				'gitlab-url'         => untrailingslashit( $args['gitlab_url'] ),
+				'repo'               => str_replace( '/', '%2F', $args['repo'] ),
+			];
+
+			/**
+			 * Insert it.
+			 */
+			$this->plugin_data[ $args['slug'] ] = $tmp_array;
+		} // End if().
 
 		/**
 		 * Hook into pre_set_site_transient_update_plugins to modify the update_plugins
@@ -70,22 +103,27 @@ class PluginUpdater extends UpdaterBase {
 		 * rather than in a method…
 		 */
 		add_filter( 'site_transient_update_plugins', function ( $transient ) {
+			if ( empty ( $transient->response ) ) {
+				return $transient;
+			}
+
 			/**
 			 * Check if we have an update for a plugin with the same slug from W.org
 			 * and remove it.
 			 *
-			 * At first, we loop the available updates.
+			 * At first, we loop the GitLab updater plugins.
 			 */
-			foreach ( $transient->response as $key => $value ) {
+			foreach ( $this->plugin_data as $plugin ) {
+				$plugin_basename = $plugin['settings-array-key'];
 				/**
 				 * Check if we have a plugin with the same slug and another package URL
 				 * than our GitLab URL.
 				 */
-				if ( $this->slug === $value->slug && false === strpos( $value->package, $this->gitlab_repo_api_url ) ) {
+				if ( array_key_exists( $plugin_basename, $transient->response ) && false === strpos( $transient->response[ $plugin_basename ]->package, $plugin['gitlab-url'] ) ) {
 					/**
 					 * Unset the response key for that plugin.
 					 */
-					unset( $transient->response[ $key ] );
+					unset( $transient->response[ $plugin_basename ] );
 				}
 			}
 
@@ -101,11 +139,13 @@ class PluginUpdater extends UpdaterBase {
 		 * (so everything but matching the plugin slug).
 		 */
 		add_filter( 'upgrader_source_selection', function ( $source, $remote_source, $wp_upgrader, $args ) {
-			/**
-			 * Check if the currently updated plugin matches our plugin base name.
-			 */
-			if ( $args['plugin'] === $this->plugin_base_name ) {
-				$source = $this->filter_source_name( $source, $remote_source, $wp_upgrader, $args );
+			foreach ( $this->plugin_data as $plugin ) {
+				/**
+				 * Check if the currently updated plugin matches our plugin base name.
+				 */
+				if ( $args['plugin'] === $plugin['settings-array-key'] ) {
+					$source = $this->filter_source_name( $source, $remote_source, $plugin['slug'] );
+				}
 			}
 
 			return $source;
@@ -124,74 +164,83 @@ class PluginUpdater extends UpdaterBase {
 			return $transient;
 		}
 
-		/**
-		 * Get tag list from GitLab repo.
-		 */
-		$request = $this->fetch_tags_from_repo();
-
-		/**
-		 * Get response code of the request.
-		 */
-		$response_code = wp_remote_retrieve_response_code( $request );
-
-		/**
-		 * Check if request is not valid and return the $transient.
-		 * Otherwise get the data body.
-		 */
-		if ( is_wp_error( $request ) || 200 !== $response_code ) {
-			return $transient;
-		} else {
-			$response = wp_remote_retrieve_body( $request );
-		}
-
-		/**
-		 * Decode json.
-		 */
-		$data = json_decode( $response );
-
-		/**
-		 * Check if we have no tags and return the transient.
-		 */
-		if ( empty( $data ) ) {
-			return $transient;
-		}
-
-		/**
-		 * Get the latest tag.
-		 */
-		$latest_version = $data[0]->name;
-
-		/**
-		 * Check if new version is available.
-		 */
-		if ( version_compare( $transient->checked[ $this->plugin_base_name ], $latest_version, '<' ) ) {
+		foreach ( $this->plugin_data as $plugin ) {
 			/**
-			 * Get the package URL.
+			 * Get data from array which we need to build package URL.
 			 */
-			$plugin_package = "$this->gitlab_repo_api_url/repository/archive.zip?sha=$latest_version&private_token=$this->access_token";
+			$gitlab_url   = $plugin['gitlab-url'];
+			$repo         = $plugin['repo'];
+			$access_token = $plugin['access-token'];
 
 			/**
-			 * Check the response.
+			 * Get tag list from GitLab repo.
 			 */
-			$response      = wp_safe_remote_get( $plugin_package );
-			$response_code = wp_remote_retrieve_response_code( $response );
-			if ( is_wp_error( $response ) || 200 !== $response_code ) {
-				return $transient;
+			$request = $this->fetch_tags_from_repo( $gitlab_url, $repo, $access_token );
+
+			/**
+			 * Get response code of the request.
+			 */
+			$response_code = wp_remote_retrieve_response_code( $request );
+
+			/**
+			 * Check if request is not valid and return the $transient.
+			 * Otherwise get the data body.
+			 */
+			if ( is_wp_error( $request ) || 200 !== $response_code ) {
+				continue;
 			} else {
-				/**
-				 * Build stdClass
-				 */
-				$info              = new \stdClass();
-				$info->slug        = $this->slug;
-				$info->plugin      = $this->plugin_base_name;
-				$info->package     = $plugin_package;
-				$info->new_version = $latest_version;
-				/**
-				 * Add data to transient.
-				 */
-				$transient->response[ $this->plugin_base_name ] = $info;
+				$response = wp_remote_retrieve_body( $request );
 			}
-		} // End if().
+
+			/**
+			 * Decode json.
+			 */
+			$data = json_decode( $response );
+
+			/**
+			 * Check if we have no tags and return the transient.
+			 */
+			if ( empty( $data ) ) {
+				continue;
+			}
+
+			/**
+			 * Get the latest tag.
+			 */
+			$latest_version = $data[0]->name;
+
+			/**
+			 * Check if new version is available.
+			 */
+			if ( version_compare( $transient->checked[ $plugin['settings-array-key'] ], $latest_version, '<' ) ) {
+				/**
+				 * Get the package URL.
+				 */
+				$plugin_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
+
+				/**
+				 * Check the response.
+				 */
+				$response      = wp_safe_remote_get( $plugin_package );
+				$response_code = wp_remote_retrieve_response_code( $response );
+				if ( is_wp_error( $response ) || 200 !== $response_code ) {
+					continue;
+				} else {
+					/**
+					 * Build stdClass
+					 */
+					$info              = new \stdClass();
+					$info->slug        = $plugin['slug'];
+					$info->plugin      = $plugin['settings-array-key'];
+					$info->package     = $plugin_package;
+					$info->new_version = $latest_version;
+					/**
+					 * Add data to transient.
+					 */
+					$transient->response[ $plugin['settings-array-key'] ] = $info;
+				}
+			} // End if().
+		} // End foreach().
 
 		return $transient;
 	}

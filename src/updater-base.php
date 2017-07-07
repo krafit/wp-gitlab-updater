@@ -9,39 +9,49 @@
 namespace Moenus\GitLabUpdater;
 
 /**
+ * If this file is called directly, abort.
+ */
+if ( ! defined( 'WPINC' ) ) {
+	die;
+}
+
+/**
  * Base class for handling WordPress theme or plugin updates from a GitLab repo.
  *
  * Class UpdaterBase
  */
 class UpdaterBase {
 	/**
-	 * Theme or plugin slug.
-	 *
-	 * @var string
+	 * UpdaterBase constructor.
 	 */
-	protected $slug;
+	public function __construct() {
+		/**
+		 * Setup options page.
+		 */
+		new Settings();
 
-	/**
-	 * Personal access token, which needs the »api« and »read_registry« scope.
-	 *
-	 * @var string
-	 */
-	protected $access_token;
+		/**
+		 * Run plugin updater.
+		 */
+		new PluginUpdater();
 
-	/**
-	 * GitLab repo API URL. For example: https://gitlab.com/api/v4/projects/user%2FprojectName/
-	 *
-	 * @var string
-	 */
-	protected $gitlab_repo_api_url;
+		/**
+		 * Run theme updater.
+		 */
+		new ThemeUpdater();
+	}
 
 	/**
 	 * Fetch data of latest version.
 	 *
-	 * @return array|WP_Error Array with data of the latest theme version or WP_Error.
+	 * @param string $gitlab_url   URL to GitLab install.
+	 * @param string $repo         Repo identifier in format username/repo or group/repo.
+	 * @param string $access_token Access token.
+	 *
+	 * @return array|WP_Error Array with data of the latest version or WP_Error.
 	 */
-	protected function fetch_tags_from_repo() {
-		$request_url = "$this->gitlab_repo_api_url/repository/tags/?private_token=$this->access_token";
+	protected function fetch_tags_from_repo( $gitlab_url, $repo, $access_token ) {
+		$request_url = "$gitlab_url/api/v4/projects/$repo/repository/tags/?private_token=$access_token";
 		$request     = wp_safe_remote_get( $request_url );
 
 		return $request;
@@ -52,12 +62,11 @@ class UpdaterBase {
 	 *
 	 * @param string $source        URL of the tmp folder with the theme or plugin files.
 	 * @param string $remote_source Source URL on remote.
-	 * @param object $wp_upgrader   WP_Upgrader instance.
-	 * @param array  $args          Additional args.
+	 * @param string $slug          Directory name.
 	 *
 	 * @return string
 	 */
-	protected function filter_source_name( $source, $remote_source, $wp_upgrader, $args ) {
+	protected function filter_source_name( $source, $remote_source, $slug ) {
 		global $wp_filesystem;
 
 		/**
@@ -67,7 +76,7 @@ class UpdaterBase {
 			/**
 			 * Create a folder with slug as name inside the folder.
 			 */
-			$upgrade_theme_folder = $remote_source . "/$this->slug";
+			$upgrade_theme_folder = $remote_source . "/$slug";
 			$wp_filesystem->mkdir( $upgrade_theme_folder );
 
 			/**

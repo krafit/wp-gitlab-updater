@@ -8,52 +8,21 @@ The script uses the GitLab tags to check for a new version.
 ## Usage as a WordPress plugin
 
 Just download the repo and upload the ZIP as a new plugin to 
-your WordPress install (or maybe as a MU plugin). To use the 
-update feature for your plugins or themes, you need to modify its code a bit:
+your WordPress install or use the [GitHub updater](https://github.com/afragen/github-updater) plugin.
 
-### With a theme
+After that, you will find a new options page under *Settings* › *GitLab Updater*. There 
+you can find all installed themes and plugins, and fields to insert the needed data
+to make one or more of them use your GitLab repo as update source.
 
-To enable theme updates, you can put the following code into 
-the functions.php (or a related file):
-```php
-if ( class_exists( '\Moenus\GitLabUpdater\ThemeUpdater' ) ) {
-    /**
-     * Init the theme updater with the theme slug.
-     */
-    new Moenus\GitLabUpdater\ThemeUpdater( 'slug', 'access_token', 'gitlab_repo_api_url' );
-}
-```
-* `slug` has to be the name of the theme folder.
-* `access_token` is the GitLab API access token 
+Search the theme or plugin in the list and insert the following data:
+
+* **Access token** is the GitLab API access token 
 (needs »api« and »read_registry« scope). The safest way 
 might be to create the access token for an external user with 
 the role »reporter«, who has only access to the theme repo. 
 Project features like wiki and issues can be hidden from external users.
-* `gitlab_repo_api_url` needs to be the API URL to the repo. 
-This could look something like that: `https://gitlab.com/api/v4/projects/(username|group)%2Fproject/` 
-— notice the encoded `(username|group)/project` part (replace `/` with `%2F`). If the project is part
-of a group, use the group name instead of the username (the form that is displayed
-in the URL when visiting the project in GitLab).
-
-### With a plugin
-
-The usage in a plugin is similar:
-
-```php
-add_action( 'plugins_loaded', function () {
-	if ( class_exists( '\Moenus\GitLabUpdater\PluginUpdater' ) ) {
-        /**
-         * Init the plugin updater with the plugin base name.
-         */
-        new \Moenus\GitLabUpdater\PluginUpdater( 'slug', 'plugin_base_name', 'access_token', 'gitlab_repo_api_url' );
-    }
-} );
-```
-* `slug` has to be the name of the plugin folder.
-* `plugin_base_name` needs to be the base name of the plugin 
-(folder and main file. For example `svg-social-menu/svg-social-menu.php`).
-* `access_token` is the GitLab API access token (see _With a theme_ for more info).
-* `gitlab_repo_api_url` needs to be the API URL to the repo (see _With a theme_ for an example URL).
+* **GitLab URL** needs to be the URL of your GitLab install. For example `https://gitlab.com`
+* **Repo** needs to be the identifier of the repo in the format `username/repo` or `group/repo`
 
 ## Bundled inside a plugin or theme
 
@@ -72,10 +41,16 @@ into a `wp-gitlab-updater` folder. After that, you can call it like that:
 /**
  * Init the theme updater.
  */
-new Moenus\GitLabUpdater\ThemeUpdater( 'slug', 'access_token', 'gitlab_repo_api_url' );
+new Moenus\GitLabUpdater\ThemeUpdater( [
+    'slug' => 'SlugOfTheTheme', 
+    'access_token' => 'YourGitLabAccessToken',
+    'gitlab_url' => 'URLtoGitLabInstall',
+    'repo' => 'RepoIdentifier',
+] );
 ```
 
-The params are the same as explained in the _Usage as a WordPress plugin_ part. 
+The params are the same as explained in the _Usage as a WordPress plugin_ part — `slug` must be the 
+directory of the theme. 
 
 ### Inside a plugin
 
@@ -86,12 +61,19 @@ put it into your plugin and call it:
 /**
  * Include the file with the PluginUpdater class.
  */
- require_once 'wp-gitlab-updater/plugin-updater.php';
+require_once 'wp-gitlab-updater/plugin-updater.php';
   
 /**
  * Init the plugin updater with the plugin base name.
  */
-new Moenus\GitLabUpdater\PluginUpdater( 'slug', 'plugin_base_name', 'access_token', 'gitlab_repo_api_url' );
+new Moenus\GitLabUpdater\PluginUpdater( [
+    'slug' => 'SlugOfPlugin', 
+    'plugin_base_name' => 'BaseNameOfThePlugin', 
+    'access_token' => 'YourGitLabAccessToken', 
+    'gitlab_url' => 'URLtoGitLabInstall',
+    'repo' => 'RepoIdentifier',
+] );
 ```
 
-Same params as explained in _Usage as a WordPress plugin_
+Same params as explained in _Usage as a WordPress plugin_ — `slug` is plugin directory
+and `plugin_base_name` the basename (for example, `svg-social-menu/svg-social-menu.php`).
