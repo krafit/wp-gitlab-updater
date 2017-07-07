@@ -13,7 +13,7 @@
  * Plugin Name:       GitLab updater
  * Plugin URI:        https://github.com/Moenus/wp-gitlab-updater
  * Description:       Plugin for updating themes and plugins from private GitLab repos.
- * Version:           1.0.0
+ * Version:           2.0.0
  * Author:            Florian Brinkmann
  * Author URI:        https://florianbrinkmann.com/en/
  * License:           GPL-2.0+
