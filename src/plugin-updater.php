@@ -59,9 +59,9 @@ class PluginUpdater extends UpdaterBase {
 		/**
 		 * Set plugin data.
 		 */
-		if ( false !== get_option( 'wp-gitlab-updater-plugins' ) ) {
-			$this->plugin_data = (array) get_option( 'wp-gitlab-updater-plugins' );
-
+		$plugin_data = ( is_multisite() ? (array) get_site_option( "wp-gitlab-updater-plugins" ) : (array) get_option( "wp-gitlab-updater-plugins" ) );
+		if ( false !== $plugin_data ) {
+			$this->plugin_data = $plugin_data;
 		}
 
 		/**

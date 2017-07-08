@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1 - 08.07.2017
+
+### Fixed
+
+* Works now with multisite.
+
 ## 2.0.0 - 06.07.2017
 
 **This is a major update. If you used the plugin or lib version 1.0.0, you need to modify your code. See

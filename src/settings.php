@@ -46,6 +46,8 @@ class Settings {
 		 */
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_options_page' ] );
 
+		add_action( 'network_admin_edit_wp-gitlab-updater', [ $this, 'update_network_options' ] );
+
 		/**
 		 * Register settings.
 		 */
@@ -95,7 +97,11 @@ class Settings {
 			 *
 			 * @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L219
 			 */
-			$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'themes'; ?>
+			$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'themes';
+			if ( isset( $_GET['updated'] ) ) { ?>
+				<div id="message" class="updated notice is-dismissible">
+					<p><?php _e( 'Settings saved.', 'wp-gitlab-updater' ) ?></p></div>
+			<?php } ?>
 			<h2 class="nav-tab-wrapper">
 				<?php
 				$tab_items = [
@@ -187,6 +193,58 @@ class Settings {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * This function here is hooked up to a special action and necessary to process
+	 * the saving of the options. This is the big difference with a normal options
+	 * page.
+	 *
+	 * @link https://vedovini.net/2015/10/using-the-wordpress-settings-api-with-network-admin-pages/
+	 */
+	function update_network_options() {
+		$tab = '';
+
+		$update = false;
+
+		/**
+		 * Check for themes settings page.
+		 */
+		if ( isset( $_POST['option_page'] ) && 'wp-gitlab-updater-themes' === $_POST['option_page'] ) {
+			if ( false !== check_admin_referer( 'wp-gitlab-updater-themes-options' ) ) {
+				$options = $_POST['wp-gitlab-updater-themes'];
+				update_site_option( 'wp-gitlab-updater-themes', $options );
+				$tab    = 'themes';
+				$update = true;
+			}
+		}
+
+
+		/**
+		 * Check for plugins settings page.
+		 */
+		if ( isset( $_POST['option_page'] ) && 'wp-gitlab-updater-plugins' === $_POST['option_page'] ) {
+			if ( false !== check_admin_referer( 'wp-gitlab-updater-plugins-options' ) ) {
+				$options = $_POST['wp-gitlab-updater-plugins'];
+				update_site_option( 'wp-gitlab-updater-plugins', $options );
+				$tab    = 'plugins';
+				$update = true;
+			}
+		}
+
+		/**
+		 * Redirect to our options page.
+		 */
+		$location = add_query_arg(
+			[
+				'page'    => 'wp-gitlab-updater',
+				'tab'     => $tab,
+				'updated' => $update,
+			],
+			network_admin_url( 'settings.php' )
+		);
+		wp_safe_redirect( $location );
+		exit;
 	}
 
 	/**
@@ -578,7 +636,7 @@ class Settings {
 		 *
 		 * @link https://konstantin.blog/2012/the-wordpress-settings-api/
 		 */
-		$options = (array) get_option( "wp-gitlab-updater-$type" );
+		$options = ( is_multisite() ? (array) get_site_option( "wp-gitlab-updater-$type" ) : (array) get_option( "wp-gitlab-updater-$type" ) );
 
 		/**
 		 * Get label for.
@@ -620,9 +678,9 @@ class Settings {
 			}
 		} ?>
 		<input
-			id="<?php echo $label_for; ?>" <?php echo ( isset( $args['readonly'] ) && true === $args['readonly'] ) ? 'readonly' : ''; ?>
-			type="text" value="<?php echo $value; ?>"
-			name="wp-gitlab-updater-<?php echo $type; ?>[<?php echo $settings_array_key ?>][<?php echo $value_array_key ?>]">
+				id="<?php echo $label_for; ?>" <?php echo ( isset( $args['readonly'] ) && true === $args['readonly'] ) ? 'readonly' : ''; ?>
+				type="text" value="<?php echo $value; ?>"
+				name="wp-gitlab-updater-<?php echo $type; ?>[<?php echo $settings_array_key ?>][<?php echo $value_array_key ?>]">
 		<?php
 		/**
 		 * Check for description.
