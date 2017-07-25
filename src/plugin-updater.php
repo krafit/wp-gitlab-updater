@@ -143,7 +143,7 @@ class PluginUpdater extends UpdaterBase {
 				/**
 				 * Check if the currently updated plugin matches our plugin base name.
 				 */
-				if ( $args['plugin'] === $plugin['settings-array-key'] ) {
+				if ( $args['plugin'] === $plugin['settings-array-key'] && false !== $plugin ) {
 					$source = $this->filter_source_name( $source, $remote_source, $plugin['slug'] );
 				}
 			}

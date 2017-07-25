@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.2 - 25.07.2017
+
+### Fixed
+
+* Issue with renaming plugins or themes which should not get updates from GitLab updater. The issue leads in renamed
+directories, so WordPress cannot find the plugin/theme after an update and deactivates it.
+
 ## 2.0.1 - 08.07.2017
 
 ### Fixed

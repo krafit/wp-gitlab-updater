@@ -140,7 +140,7 @@ class ThemeUpdater extends UpdaterBase {
 				/**
 				 * Check if the currently updated theme matches our theme slug.
 				 */
-				if ( $args['theme'] === $theme['settings-array-key'] ) {
+				if ( $args['theme'] === $theme['settings-array-key'] && false !== $theme ) {
 					$source = $this->filter_source_name( $source, $remote_source, $theme['settings-array-key'] );
 				}
 			}
