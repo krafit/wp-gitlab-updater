@@ -1,0 +1,12 @@
+{
+    "name": "krafit/wp-gitlab-updater",
+    "description": "WordPress plugin and theme updates from private GitLab repos",
+    "type": "library",
+    "require": {},
+
+    "autoload": {
+        "psr-4": {
+            "Moenus\\": "src/"
+        }
+    }
+}
