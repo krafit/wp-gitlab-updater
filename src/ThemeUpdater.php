@@ -22,7 +22,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Include UpdaterBase class.
  */
-require_once 'updater-base.php';
+require_once 'UpdaterBase.php';
 
 /**
  * Class ThemeUpdater

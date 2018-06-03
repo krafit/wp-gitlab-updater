@@ -34,10 +34,10 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Include classes.
  */
-require_once 'src/updater-base.php';
-require_once 'src/settings.php';
-require_once 'src/plugin-updater.php';
-require_once 'src/theme-updater.php';
+require_once 'src/UpdaterBase.php';
+require_once 'src/Settings.php';
+require_once 'src/PluginUpdater.php';
+require_once 'src/ThemeUpdater.php';
 
 /**
  * Init plugin.
