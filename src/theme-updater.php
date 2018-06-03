@@ -184,7 +184,7 @@ class ThemeUpdater extends UpdaterBase {
 			 * Otherwise get the data body.
 			 */
 			if ( is_wp_error( $request ) || 200 !== $response_code ) {
-				return $transient;
+				continue;
 			} else {
 				$response = wp_remote_retrieve_body( $request );
 			}
@@ -198,7 +198,7 @@ class ThemeUpdater extends UpdaterBase {
 			 * Check if we have no tags and return the transient.
 			 */
 			if ( empty( $data ) ) {
-				return $transient;
+				continue;
 			}
 
 			/**
@@ -221,7 +221,7 @@ class ThemeUpdater extends UpdaterBase {
 				$response      = wp_safe_remote_get( $theme_package );
 				$response_code = wp_remote_retrieve_response_code( $response );
 				if ( is_wp_error( $response ) || 200 !== $response_code ) {
-					return $transient;
+					continue;
 				} else {
 					/**
 					 * Add data to response array.
