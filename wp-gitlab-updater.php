@@ -2,7 +2,7 @@
 /**
  * Lib for updating themes and plugins from private GitLab repos.
  *
- * @package   Moenus\GitLabUpdater
+ * @package   Krafit\GitLabUpdater
  * @author    Florian Brinkmann
  * @license   GPL-2.0+
  * @link      https://florianbrinkmann.com/en/
@@ -11,7 +11,7 @@
 
 /**
  * Plugin Name:       GitLab updater
- * Plugin URI:        https://github.com/Moenus/wp-gitlab-updater
+ * Plugin URI:        https://github.com/Krafit/wp-gitlab-updater
  * Description:       Plugin for updating themes and plugins from private GitLab repos.
  * Version:           2.0.2
  * Author:            Florian Brinkmann
@@ -19,10 +19,10 @@
  * License:           GPL-2.0+
  * Network:           true
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * GitHub Plugin URI: Moenus/wp-gitlab-updater
+ * GitHub Plugin URI: Krafit/wp-gitlab-updater
  */
 
-namespace Moenus\GitLabUpdater;
+namespace Krafit\GitLabUpdater;
 
 /**
  * If this file is called directly, abort.

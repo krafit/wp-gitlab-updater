@@ -2,11 +2,11 @@
 /**
  * Uninstall routine
  *
- * @package Moenus\GitLabUpdater
+ * @package Krafit\GitLabUpdater
  * @author  Florian Brinkmann
  */
 
-namespace Moenus\GitLabUpdater;
+namespace Krafit\GitLabUpdater;
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	die;

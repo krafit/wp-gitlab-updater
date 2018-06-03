@@ -6,7 +6,7 @@
 
     "autoload": {
         "psr-4": {
-            "Moenus\\GitLabUpdater\\": "src/"
+            "Krafit\\GitLabUpdater\\": "src/"
         }
     }
 }

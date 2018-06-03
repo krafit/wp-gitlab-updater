@@ -6,11 +6,11 @@
  * the theme repo. Project features like wiki and issues can be
  * hidden from external users.
  *
- * @package Moenus\GitLabUpdater
+ * @package Krafit\GitLabUpdater
  * @author  Florian Brinkmann
  */
 
-namespace Moenus\GitLabUpdater;
+namespace Krafit\GitLabUpdater;
 
 /**
  * If this file is called directly, abort.
@@ -29,7 +29,7 @@ require_once 'updater-base.php';
  *
  * Class for handling theme updates from GitLab repo.
  *
- * @package Moenus\GitLabUpdater
+ * @package Krafit\GitLabUpdater
  */
 class ThemeUpdater extends UpdaterBase {
 	/**

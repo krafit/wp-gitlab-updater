@@ -2,11 +2,11 @@
 /**
  * Base class for GitLab updater.
  *
- * @package Moenus\GitLabUpdater
+ * @package Krafit\GitLabUpdater
  * @author  Florian Brinkmann
  */
 
-namespace Moenus\GitLabUpdater;
+namespace Krafit\GitLabUpdater;
 
 /**
  * If this file is called directly, abort.
