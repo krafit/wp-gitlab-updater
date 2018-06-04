@@ -2,11 +2,11 @@
 /**
  * Creates options page with settings..
  *
- * @package Krafit\GitLabUpdater
+ * @package Moenus\GitLabUpdater
  * @author  Florian Brinkmann
  */
 
-namespace Krafit\GitLabUpdater;
+namespace Moenus\GitLabUpdater;
 
 /**
  * If this file is called directly, abort.
