@@ -50,6 +50,7 @@ class ThemeUpdater extends UpdaterBase {
 	 * @type string $gitlab_url              GitLab URL. For example: https://gitlab.com/
 	 * @type string $repo                    GitLab repo name with user or group.
 	 *                                       For example: username/repo or group/repo
+	 * @type string $job                     Job name for downloading the the artifacts
 	 * }
 	 */
 	public function __construct( $args = [] ) {
@@ -74,6 +75,13 @@ class ThemeUpdater extends UpdaterBase {
 				'gitlab-url'         => untrailingslashit( $args['gitlab_url'] ),
 				'repo'               => str_replace( '/', '%2F', $args['repo'] ),
 			];
+
+			/**
+			 * Add job name if it exists
+			 */
+			if ( array_key_exists( 'job', $args ) ) {
+				$tmp_array['job'] = $args['job'];
+			}
 
 			/**
 			 * Insert it.
@@ -169,6 +177,10 @@ class ThemeUpdater extends UpdaterBase {
 			$repo         = $theme['repo'];
 			$access_token = $theme['access-token'];
 
+			if ( array_key_exists( 'job', $theme ) ) {
+				$job = $theme['job'];
+			}
+
 			/**
 			 * Get tag list from GitLab repo.
 			 */
@@ -207,13 +219,22 @@ class ThemeUpdater extends UpdaterBase {
 			$latest_version = $data[0]->name;
 
 			/**
+			 * Remove optional v in tag.
+			 */
+			$latest_version_trim = str_replace('v', '', $latest_version);
+
+			/**
 			 * Check if new version is available.
 			 */
-			if ( version_compare( $transient->checked[ $theme['settings-array-key'] ], $latest_version, '<' ) ) {
+			if ( version_compare( $transient->checked[ $theme['settings-array-key'] ], $latest_version_trim, '<' ) ) {
 				/**
 				 * Get the package URL.
 				 */
-				$theme_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
+				if ( isset( $job ) ) {
+					$theme_package = "$gitlab_url/api/v4/projects/$repo/jobs/artifacts/$latest_version/download?job=$job&private_token=$access_token";
+				} else {
+					$theme_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
+				}
 
 				/**
 				 * Check the response.
