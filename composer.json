@@ -1,5 +1,5 @@
 {
-    "name": "krafit/wp-gitlab-updater",
+    "name": "moenus/wp-gitlab-updater",
     "description": "WordPress plugin and theme updates from private GitLab repos",
     "type": "library",
     "require": {},
