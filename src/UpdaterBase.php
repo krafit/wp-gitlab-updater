@@ -74,11 +74,42 @@ class UpdaterBase {
 		 */
 		if ( $wp_filesystem->exists( $remote_source ) ) {
 			/**
-			 * Move download folder in folder with slug
+			 * Switch between artifacts and tag download.
+			 *
+			 * The artifacts archive has another file structure.
 			 */
-			$upgrade_theme_folder = dirname($remote_source, 1) . "/$slug";
+			if ( rtrim( $source, '/') !== $remote_source ) {
+				/**
+				 * Create a folder with slug as name inside the folder.
+				 */
+				$upgrade_theme_folder = $remote_source . "/$slug";
+				$wp_filesystem->mkdir( $upgrade_theme_folder );
 
-			$wp_filesystem->move($source, $upgrade_theme_folder);
+				/**
+				 * Copy files from $source in new $upgrade_theme_folder
+				 */
+				copy_dir( $source, $upgrade_theme_folder );
+
+				/**
+				 * Remove the old $source directory.
+				 */
+				$wp_filesystem->delete( $source, true );
+
+			} else {
+				$tmp_theme_folder = dirname($source, 1) . "/$slug";
+				$wp_filesystem->move($source, $tmp_theme_folder);
+
+				/**
+				 * Restore remote source directory
+				 */
+				$wp_filesystem->mkdir( $remote_source );
+
+				/**
+				 * Move tmp theme folder in source folder
+				 */
+				$upgrade_theme_folder = $remote_source . "/$slug";
+				$wp_filesystem->move($tmp_theme_folder, $upgrade_theme_folder);
+			}
 
 			/**
 			 * Set new folder as $source.
