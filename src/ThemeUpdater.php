@@ -248,7 +248,7 @@ class ThemeUpdater extends UpdaterBase {
 					 * Add data to response array.
 					 */
 					$transient->response[ $theme['settings-array-key'] ]['theme']       = $theme['settings-array-key'];
-					$transient->response[ $theme['settings-array-key'] ]['new_version'] = $latest_version;
+					$transient->response[ $theme['settings-array-key'] ]['new_version'] = $latest_version_trim;
 					$transient->response[ $theme['settings-array-key'] ]['package']     = $theme_package;
 				}
 			} // End if().
