@@ -74,20 +74,11 @@ class UpdaterBase {
 		 */
 		if ( $wp_filesystem->exists( $remote_source ) ) {
 			/**
-			 * Create a folder with slug as name inside the folder.
+			 * Move download folder in folder with slug
 			 */
-			$upgrade_theme_folder = $remote_source . "/$slug";
-			$wp_filesystem->mkdir( $upgrade_theme_folder );
+			$upgrade_theme_folder = dirname($remote_source, 1) . "/$slug";
 
-			/**
-			 * Copy files from $source in new $upgrade_theme_folder
-			 */
-			copy_dir( $source, $upgrade_theme_folder );
-
-			/**
-			 * Remove the old $source directory.
-			 */
-			$wp_filesystem->delete( $source, true );
+			$wp_filesystem->move($source, $upgrade_theme_folder);
 
 			/**
 			 * Set new folder as $source.
