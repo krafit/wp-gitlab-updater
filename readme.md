@@ -17,7 +17,7 @@ to make one or more of them use your GitLab repo as update source.
 Search the theme or plugin in the list and insert the following data:
 
 * **Access token** is the GitLab API access token 
-(needs »api« and »read_registry« scope). The safest way 
+(needs »api« and »read_registry« scope. If you use the gitlab.com version, you can create the token here: [gitlab.com/profile/personal_access_tokens](https://gitlab.com/profile/personal_access_tokens)). The safest way 
 might be to create the access token for an external user with 
 the role »reporter«, who has only access to the theme repo. 
 Project features like wiki and issues can be hidden from external users.
