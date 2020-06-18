@@ -112,6 +112,10 @@ class PluginUpdater extends UpdaterBase {
 			return $transient;
 		} );
 
+		/**
+		 * Before the files are copied to wp-content/plugins, we need to rename the
+		 * folder of the plugin, so it matches the slug. That is because WordPress
+		 * uses the folder name for the destination inside wp-content/plugins, not
 		 * the plugin slug. And the name of the ZIP we get from the GitLab API call
 		 * is something with the project name, the tag number and the commit SHA
 		 * (so everything but matching the plugin slug).
@@ -132,9 +136,6 @@ class PluginUpdater extends UpdaterBase {
 	 * Checking for updates and updating the transient for plugin updates.
 	 *
 	 * @param object $transient Transient object for plugin updates.
-		/**
-		 * Before the files are copied to wp-content/plugins, we need to rename the
-		 * folder of the plugin, so it matches the slug. That is because WordPress
 	 *
 	 * @return object plugin update transient.
 	 */
