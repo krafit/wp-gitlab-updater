@@ -176,6 +176,10 @@ class PluginUpdater extends UpdaterBase {
 			$latest_version = $data[0]->name;
 
 			// Check if new version is available.
+			if ( ! isset( $transient->checked[ $plugin['settings-array-key'] ] ) ) {
+				continue;
+			}
+			
 			if ( version_compare( $transient->checked[ $plugin['settings-array-key'] ], $latest_version, '<' ) ) {
 				// Get the package URL.
 				$plugin_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
