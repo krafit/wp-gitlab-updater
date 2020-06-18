@@ -39,18 +39,14 @@ class Settings {
 	 * Settings constructor.
 	 */
 	public function __construct() {
-		/**
-		 * Create options page.
-		 *
-		 * @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L101
-		 */
+		// Create options page.
+		//
+		// @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L101
 		add_action( is_multisite() ? 'network_admin_menu' : 'admin_menu', [ $this, 'add_options_page' ] );
 
 		add_action( 'network_admin_edit_wp-gitlab-updater', [ $this, 'update_network_options' ] );
 
-		/**
-		 * Register settings.
-		 */
+		// Register settings.
 		add_action( 'admin_init', [ $this, 'settings_init' ] );
 	}
 
@@ -58,17 +54,13 @@ class Settings {
 	 * Add options page.
 	 */
 	public function add_options_page() {
-		/**
-		 * Set parent page and capability.
-		 *
-		 * @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L197-L198
-		 */
+		// Set parent page and capability.
+		//
+		// @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L197-L198
 		$parent     = is_multisite() ? 'settings.php' : 'options-general.php';
 		$capability = is_multisite() ? 'manage_network' : 'manage_options';
 
-		/**
-		 * Add submenu page.
-		 */
+		// Add submenu page.
 		add_submenu_page(
 			$parent,
 			esc_html__( 'GitLab Updater Settings', 'wp-gitlab-updater' ),
@@ -83,20 +75,16 @@ class Settings {
 	 * Create options page.
 	 */
 	public function create_options_page() {
-		/**
-		 * Set parent page and capability.
-		 *
-		 * @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L248
-		 */
+		// Set parent page and capability.
+		//
+		// @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L248
 		$action = is_multisite() ? 'edit.php?action=wp-gitlab-updater' : 'options.php'; ?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php
-			/**
-			 * Create tabs.
-			 *
-			 * @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L219
-			 */
+			// Create tabs.
+			//
+			// @link https://github.com/afragen/github-updater/blob/develop/src/GitHub_Updater/Settings.php#L219
 			$current_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'themes';
 			if ( isset( $_GET['updated'] ) ) { ?>
 				<div id="message" class="updated notice is-dismissible">
@@ -115,55 +103,35 @@ class Settings {
 			</h2>
 			<ul>
 				<?php
-				/**
-				 * Check for currently displayed tab.
-				 */
+				// Check for currently displayed tab.
 				if ( 'themes' === $current_tab ) {
-					/**
-					 * Display instructions.
-					 */
+					// Display instructions.
 					$this->section_instructions( $current_tab );
 
-					/**
-					 * Display list of themes as jump nav.
-					 */
+					// Display list of themes as jump nav.
 					foreach ( $this->installed_themes as $installed_theme ) {
-						/**
-						 * Get slug and name.
-						 */
+						// Get slug and name.
 						$slug = $installed_theme->stylesheet;
 						$name = $installed_theme->get( 'Name' );
 
-						/**
-						 * Output link inside li.
-						 */
+						// Output link inside li.
 						?>
 						<li><a href="#<?php echo $slug; ?>"><?php echo $name; ?></a></li>
 					<?php }
 				} else {
-					/**
-					 * Display instructions.
-					 */
+					// Display instructions.
 					$this->section_instructions( $current_tab );
 
-					/**
-					 * Display list of plugins as jump nav.
-					 */
+					// Display list of plugins as jump nav.
 					foreach ( $this->installed_plugins as $plugin_basename => $plugin_data ) {
-						/**
-						 * Get slug.
-						 */
+						// Get slug.
 						$arr  = explode( "/", $plugin_basename, 2 );
 						$slug = $arr[0];
 
-						/**
-						 * Get name.
-						 */
+						// Get name.
 						$name = $plugin_data['Name'];
 
-						/**
-						 * Output link inside li.
-						 */
+						// Output link inside li.
 						?>
 						<li><a href="#<?php echo $slug; ?>"><?php echo $name; ?></a></li>
 					<?php }
@@ -171,23 +139,17 @@ class Settings {
 			</ul>
 			<form action="<?php echo $action; ?>" method="post">
 				<?php
-				/**
-				 * Output security fields.
-				 */
+				// Output security fields.
 				if ( 'themes' === $current_tab ) {
 					settings_fields( 'wp-gitlab-updater-themes' );
 				} else {
 					settings_fields( 'wp-gitlab-updater-plugins' );
 				}
 
-				/**
-				 * Output settings sections and fields.
-				 */
+				// Output settings sections and fields.
 				do_settings_sections( 'wp-gitlab-updater' );
 
-				/**
-				 * Submit button.
-				 */
+				// Submit button.
 				submit_button( __( 'Save Settings', 'wp-gitlab-updater' ) );
 				?>
 			</form>
@@ -207,9 +169,7 @@ class Settings {
 
 		$update = false;
 
-		/**
-		 * Check for themes settings page.
-		 */
+		// Check for themes settings page.
 		if ( isset( $_POST['option_page'] ) && 'wp-gitlab-updater-themes' === $_POST['option_page'] ) {
 			if ( false !== check_admin_referer( 'wp-gitlab-updater-themes-options' ) ) {
 				$options = $_POST['wp-gitlab-updater-themes'];
@@ -220,9 +180,7 @@ class Settings {
 		}
 
 
-		/**
-		 * Check for plugins settings page.
-		 */
+		// Check for plugins settings page.
 		if ( isset( $_POST['option_page'] ) && 'wp-gitlab-updater-plugins' === $_POST['option_page'] ) {
 			if ( false !== check_admin_referer( 'wp-gitlab-updater-plugins-options' ) ) {
 				$options = $_POST['wp-gitlab-updater-plugins'];
@@ -232,9 +190,7 @@ class Settings {
 			}
 		}
 
-		/**
-		 * Redirect to our options page.
-		 */
+		// Redirect to our options page.
 		$location = add_query_arg(
 			[
 				'page'    => 'wp-gitlab-updater',
@@ -264,15 +220,11 @@ class Settings {
 	 * Init settings.
 	 */
 	public function settings_init() {
-		/**
-		 * Set properties.
-		 */
+		// Set properties.
 		$this->installed_themes  = wp_get_themes();
 		$this->installed_plugins = get_plugins();
 
-		/**
-		 * Register settings.
-		 */
+		// Register settings.
 		register_setting( 'wp-gitlab-updater-themes', 'wp-gitlab-updater-themes', [
 			'sanitize_callback' => [ $this, 'sanitize_theme_settings' ],
 		] );
@@ -281,28 +233,18 @@ class Settings {
 			'sanitize_callback' => [ $this, 'sanitize_plugin_settings' ],
 		] );
 
-		/**
-		 * Check if we need the plugin settings.
-		 */
+		// Check if we need the plugin settings.
 		if ( isset( $_GET['tab'] ) && 'plugins' === $_GET['tab'] ) {
-			/**
-			 * Loop them.
-			 */
+			// Loop them.
 			foreach ( $this->installed_plugins as $plugin_basename => $plugin_data ) {
-				/**
-				 * Get slug.
-				 */
+				// Get slug.
 				$arr  = explode( "/", $plugin_basename, 2 );
 				$slug = $arr[0];
 
-				/**
-				 * Get name.
-				 */
+				// Get name.
 				$name = $plugin_data['Name'];
 
-				/**
-				 * Section for plugins.
-				 */
+				// Section for plugins.
 				add_settings_section(
 					"wp-gitlab-updater-plugins-$slug-section",
 					sprintf(
@@ -315,9 +257,7 @@ class Settings {
 					'wp-gitlab-updater'
 				);
 
-				/**
-				 * Create slug field.
-				 */
+				// Create slug field.
 				add_settings_field(
 					"wp-gitlab-updater-plugin-$slug-slug-field",
 					__( 'Plugin slug', 'wp-gitlab-updater' ),
@@ -335,9 +275,7 @@ class Settings {
 					]
 				);
 
-				/**
-				 * Create basename field.
-				 */
+				// Create basename field.
 				add_settings_field(
 					"wp-gitlab-updater-plugin-$slug-basename-field",
 					__( 'Plugin basename', 'wp-gitlab-updater' ),
@@ -355,9 +293,7 @@ class Settings {
 					]
 				);
 
-				/**
-				 * Create Access token field.
-				 */
+				// Create Access token field.
 				add_settings_field(
 					"wp-gitlab-updater-plugin-$slug-access-token-field",
 					__( 'Access token', 'wp-gitlab-updater' ),
@@ -373,9 +309,7 @@ class Settings {
 					]
 				);
 
-				/**
-				 * GitLab URL.
-				 */
+				// GitLab URL.
 				add_settings_field(
 					"wp-gitlab-updater-plugin-$slug-gitlab-url",
 					__( 'GitLab URL', 'wp-gitlab-updater' ),
@@ -391,9 +325,7 @@ class Settings {
 					]
 				);
 
-				/**
-				 * Repo information.
-				 */
+				// Repo information.
 				add_settings_field(
 					"wp-gitlab-updater-plugin-$slug-repo-information",
 					__( 'Repo', 'wp-gitlab-updater' ),
@@ -408,18 +340,14 @@ class Settings {
 						'description'        => __( 'Username or group and name of repository. For example: username/repo-name or group/repo-name.', 'wp-gitlab-updater' ),
 					]
 				);
-			} // End foreach().
+			}
 		} else {
-			/**
-			 * Loop through the themes and create a option for each of it.
-			 */
+			// Loop through the themes and create a option for each of it.
 			foreach ( $this->installed_themes as $installed_theme ) {
 				$slug = $installed_theme->stylesheet;
 				$name = $installed_theme->get( 'Name' );
 
-				/**
-				 * Register new sections in »wp-gitlab-updater« page.
-				 */
+				// Register new sections in »wp-gitlab-updater« page.
 				add_settings_section(
 					"wp-gitlab-updater-themes-$slug-section",
 					sprintf(
@@ -431,9 +359,7 @@ class Settings {
 					'wp-gitlab-updater'
 				);
 
-				/**
-				 * Create slug field.
-				 */
+				// Create slug field.
 				add_settings_field(
 					"wp-gitlab-updater-theme-$slug",
 					__( 'Theme slug', 'wp-gitlab-updater' ),
@@ -451,9 +377,7 @@ class Settings {
 					]
 				);
 
-				/**
-				 * Create Access token field.
-				 */
+				// Create Access token field.
 				add_settings_field(
 					"wp-gitlab-updater-theme-$slug-access-token-field",
 					__( 'Access token', 'wp-gitlab-updater' ),
@@ -469,9 +393,7 @@ class Settings {
 					]
 				);
 
-				/**
-				 * GitLab URL.
-				 */
+				// GitLab URL.
 				add_settings_field(
 					"wp-gitlab-updater-theme-$slug-gitlab-url",
 					__( 'GitLab URL', 'wp-gitlab-updater' ),
@@ -487,9 +409,7 @@ class Settings {
 					]
 				);
 
-				/**
-				 * Repo information.
-				 */
+				// Repo information.
 				add_settings_field(
 					"wp-gitlab-updater-theme-$slug-repo-information",
 					__( 'Repo', 'wp-gitlab-updater' ),
@@ -504,8 +424,8 @@ class Settings {
 						'description'        => __( 'Username or group and name of repository. For example: username/repo-name or group/repo-name.', 'wp-gitlab-updater' ),
 					]
 				);
-			} // End foreach().
-		} // End if().
+			}
+		}
 	}
 
 	/**
@@ -516,39 +436,25 @@ class Settings {
 	 * @return mixed
 	 */
 	public function sanitize_theme_settings( $input ) {
-		/**
-		 * Loop through the themes.
-		 * $key is theme slug.
-		 */
+		// Loop through the themes.
+		// $key is theme slug.
 		foreach ( $input as $key => $value ) {
-			/**
-			 * Check if the theme exists.
-			 */
+			// Check if the theme exists.
 			if ( $this->installed_themes[ $key ]->exists() ) {
-				/**
-				 * Check if one of the fields is empty.
-				 */
+				// Check if one of the fields is empty.
 				if ( '' === $value['settings-array-key'] || '' === $value['access-token'] || '' === $value['gitlab-url'] || '' === $value['repo'] ) {
-					/**
-					 * Unset the array with the theme info.
-					 */
+					// Unset the array with the theme info.
 					unset( $input[ $key ] );
 				} else {
-					/**
-					 * We have all information, now we need to
-					 * replace the slash in the repo info with %2F
-					 * for usage in the API URL.
-					 */
+					// We have all information, now we need to
+					// replace the slash in the repo info with %2F
+					// for usage in the API URL.
 					$input[ $key ]['repo'] = str_replace( '/', '%2F', $input[ $key ]['repo'] );
-					/**
-					 * And remove a trailing slash from the URL (if set).
-					 */
+					// And remove a trailing slash from the URL (if set).
 					$input[ $key ]['gitlab-url'] = untrailingslashit( $input[ $key ]['gitlab-url'] );
 				}
 			} else {
-				/**
-				 * We do not have that theme installed, so we unset the array.
-				 */
+				// We do not have that theme installed, so we unset the array.
 				unset( $input[ $key ] );
 			}
 		}
@@ -564,40 +470,26 @@ class Settings {
 	 * @return mixed
 	 */
 	public function sanitize_plugin_settings( $input ) {
-		/**
-		 * Loop through the plugins.
-		 * $key is plugin basename.
-		 */
+		// Loop through the plugins.
+		// $key is plugin basename.
 		foreach ( $input as $key => $value ) {
-			/**
-			 * Check if plugin is installed.
-			 */
+			// Check if plugin is installed.
 			if ( isset( $this->installed_plugins[ $key ] ) ) {
-				/**
-				 * Check if one of the fields is empty.
-				 */
+				// Check if one of the fields is empty.
 				if ( '' === $value['slug'] || '' === $value['settings-array-key'] || '' === $value['access-token'] || '' === $value['gitlab-url'] || '' === $value['repo'] ) {
-					/**
-					 * Unset the array with the theme info.
-					 */
+					// Unset the array with the theme info.
 					unset( $input[ $key ] );
 				} else {
-					/**
-					 * We have all information, now we need to
-					 * replace the slash in the repo info with %2F
-					 * for usage in the API URL.
-					 */
+					// We have all information, now we need to
+					// replace the slash in the repo info with %2F
+					// for usage in the API URL.
 					$input[ $key ]['repo'] = str_replace( '/', '%2F', $input[ $key ]['repo'] );
 
-					/**
-					 * And remove a trailing slash from the URL (if set).
-					 */
+					// And remove a trailing slash from the URL (if set).
 					$input[ $key ]['gitlab-url'] = untrailingslashit( $input[ $key ]['gitlab-url'] );
 				}
 			} else {
-				/**
-				 * Plugins is not installed, so we unser the array key.
-				 */
+				// Plugins is not installed, so we unser the array key.
 				unset( $input[ $key ] );
 			}
 		}
@@ -626,53 +518,35 @@ class Settings {
 	 * }
 	 */
 	public function field_cb( $args ) {
-		/**
-		 * Get type (plugins or themes).
-		 */
+		// Get type (plugins or themes).
 		$type = $args['type'];
 
-		/**
-		 * Get the value of the setting we've registered with register_setting()
-		 *
-		 * @link https://konstantin.blog/2012/the-wordpress-settings-api/
-		 */
+		// Get the value of the setting we've registered with register_setting()
+		//
+		// @link https://konstantin.blog/2012/the-wordpress-settings-api/
 		$options = ( is_multisite() ? (array) get_site_option( "wp-gitlab-updater-$type" ) : (array) get_option( "wp-gitlab-updater-$type" ) );
 
-		/**
-		 * Get label for.
-		 */
+		// Get label for.
 		$label_for = esc_attr( $args['label_for'] );
 
-		/**
-		 * Get settings array key.
-		 */
+		// Get settings array key.
 		$settings_array_key = $args['settings-array-key'];
 
-		/**
-		 * Get array key for value.
-		 */
+		// Get array key for value.
 		$value_array_key = $args['value_array_key'];
 
-		/**
-		 * Get description.
-		 */
+		// Get description.
 		$description = isset( $args['description'] ) ? $args['description'] : '';
 
-		/**
-		 * Get value
-		 */
+		// Get value
 		if ( isset( $args['value'] ) ) {
 			$value = esc_attr( $args['value'] );
 		} else {
-			/**
-			 * Check if we have a value in the settings array.
-			 */
+			// Check if we have a value in the settings array.
 			$value = isset( $options[ $settings_array_key ][ $value_array_key ] ) ? $options[ $settings_array_key ][ $value_array_key ] : '';
 
-			/**
-			 * Check if this is the repo.
-			 * Then we replace the %2F with / again.
-			 */
+			// Check if this is the repo.
+			// Then we replace the %2F with / again.
 			if ( 1 === preg_match( '/-repo-information$/', $label_for ) ) {
 				$value = str_replace( '%2F', '/', $value );
 			}
@@ -682,9 +556,7 @@ class Settings {
 				type="text" value="<?php echo $value; ?>"
 				name="wp-gitlab-updater-<?php echo $type; ?>[<?php echo $settings_array_key ?>][<?php echo $value_array_key ?>]">
 		<?php
-		/**
-		 * Check for description.
-		 */
+		// Check for description.
 		if ( '' !== $description ) { ?>
 			<p class="description">
 				<?php echo $description; ?>

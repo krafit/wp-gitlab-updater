@@ -24,22 +24,16 @@
 
 namespace Moenus\GitLabUpdater;
 
-/**
- * If this file is called directly, abort.
- */
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-/**
- * Include classes.
- */
+// Include classes.
 require_once 'src/updater-base.php';
 require_once 'src/settings.php';
 require_once 'src/plugin-updater.php';
 require_once 'src/theme-updater.php';
 
-/**
- * Init plugin.
- */
+// Init plugin.
 new UpdaterBase();

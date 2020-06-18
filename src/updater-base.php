@@ -8,9 +8,7 @@
 
 namespace Moenus\GitLabUpdater;
 
-/**
- * If this file is called directly, abort.
- */
+// If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
 }
@@ -25,19 +23,13 @@ class UpdaterBase {
 	 * UpdaterBase constructor.
 	 */
 	public function __construct() {
-		/**
-		 * Setup options page.
-		 */
+		// Setup options page.
 		new Settings();
 
-		/**
-		 * Run plugin updater.
-		 */
+		// Run plugin updater.
 		new PluginUpdater();
 
-		/**
-		 * Run theme updater.
-		 */
+		// Run theme updater.
 		new ThemeUpdater();
 	}
 
@@ -69,29 +61,19 @@ class UpdaterBase {
 	protected function filter_source_name( $source, $remote_source, $slug ) {
 		global $wp_filesystem;
 
-		/**
-		 * Check if the remote source directory exists.
-		 */
+		// Check if the remote source directory exists.
 		if ( $wp_filesystem->exists( $remote_source ) ) {
-			/**
-			 * Create a folder with slug as name inside the folder.
-			 */
+			// Create a folder with slug as name inside the folder.
 			$upgrade_theme_folder = $remote_source . "/$slug";
 			$wp_filesystem->mkdir( $upgrade_theme_folder );
 
-			/**
-			 * Copy files from $source in new $upgrade_theme_folder
-			 */
+			// Copy files from $source in new $upgrade_theme_folder
 			copy_dir( $source, $upgrade_theme_folder );
 
-			/**
-			 * Remove the old $source directory.
-			 */
+			// Remove the old $source directory.
 			$wp_filesystem->delete( $source, true );
 
-			/**
-			 * Set new folder as $source.
-			 */
+			// Set new folder as $source.
 			$source = $upgrade_theme_folder;
 		}
 
