@@ -26,11 +26,6 @@ class UpdaterBase {
 	 */
 	public function __construct() {
 		/**
-		 * Setup options page.
-		 */
-		new Settings();
-
-		/**
 		 * Run plugin updater.
 		 */
 		new PluginUpdater();

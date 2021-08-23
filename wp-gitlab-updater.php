@@ -35,7 +35,6 @@ if ( ! defined( 'WPINC' ) ) {
  * Include classes.
  */
 require_once 'src/UpdaterBase.php';
-require_once 'src/Settings.php';
 require_once 'src/PluginUpdater.php';
 require_once 'src/ThemeUpdater.php';
 
