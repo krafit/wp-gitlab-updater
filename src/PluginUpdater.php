@@ -212,35 +212,41 @@ class PluginUpdater extends UpdaterBase {
 			/**
 			 * Check if new version is available.
 			 */
-			if ( version_compare( $transient->checked[ $plugin['settings-array-key'] ], $latest_version, '<' ) ) {
-				/**
-				 * Get the package URL.
-				 */
-				$plugin_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
+			if ( ! isset( $transient->checked[ $plugin['settings-array-key'] ] ) ) {
+				continue;
+			}
 
-				/**
-				 * Check the response.
-				 */
-				$response      = wp_safe_remote_get( $plugin_package );
-				$response_code = wp_remote_retrieve_response_code( $response );
-				if ( is_wp_error( $response ) || 200 !== $response_code ) {
-					continue;
-				} else {
-					/**
-					 * Build stdClass
-					 */
-					$info              = new \stdClass();
-					$info->slug        = $plugin['slug'];
-					$info->plugin      = $plugin['settings-array-key'];
-					$info->package     = $plugin_package;
-					$info->new_version = $latest_version;
-					/**
-					 * Add data to transient.
-					 */
-					$transient->response[ $plugin['settings-array-key'] ] = $info;
-				}
-			} // End if().
-		} // End foreach().
+			if ( ! version_compare( $transient->checked[ $plugin['settings-array-key'] ], $latest_version, '<' ) ) {
+				continue;
+			}
+
+			/**
+			 * Get the package URL.
+			 */
+			$plugin_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
+
+			/**
+			 * Check the response.
+			 */
+			$response      = wp_safe_remote_get( $plugin_package );
+			$response_code = wp_remote_retrieve_response_code( $response );
+			if ( is_wp_error( $response ) || 200 !== $response_code ) {
+				continue;
+			}
+
+			/*
+			 * Build stdClass
+			 */
+			$info              = new \stdClass();
+			$info->slug        = $plugin['slug'];
+			$info->plugin      = $plugin['settings-array-key'];
+			$info->package     = $plugin_package;
+			$info->new_version = $latest_version;
+			/**
+			 * Add data to transient.
+			 */
+			$transient->response[ $plugin['settings-array-key'] ] = $info;
+		}
 
 		return $transient;
 	}

@@ -226,33 +226,39 @@ class ThemeUpdater extends UpdaterBase {
 			/**
 			 * Check if new version is available.
 			 */
-			if ( version_compare( $transient->checked[ $theme['settings-array-key'] ], $latest_version_trim, '<' ) ) {
-				/**
-				 * Get the package URL.
-				 */
-				if ( isset( $job ) ) {
-					$theme_package = "$gitlab_url/api/v4/projects/$repo/jobs/artifacts/$latest_version/download?job=$job&private_token=$access_token";
-				} else {
-					$theme_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
-				}
+			if ( ! isset( $transient->checked[ $theme['settings-array-key'] ] ) ) {
+				continue;
+			}
 
-				/**
-				 * Check the response.
-				 */
-				$response      = wp_safe_remote_get( $theme_package );
-				$response_code = wp_remote_retrieve_response_code( $response );
-				if ( is_wp_error( $response ) || 200 !== $response_code ) {
-					continue;
-				} else {
-					/**
-					 * Add data to response array.
-					 */
-					$transient->response[ $theme['settings-array-key'] ]['theme']       = $theme['settings-array-key'];
-					$transient->response[ $theme['settings-array-key'] ]['new_version'] = $latest_version_trim;
-					$transient->response[ $theme['settings-array-key'] ]['package']     = $theme_package;
-				}
-			} // End if().
-		} // End foreach().
+			if ( ! version_compare( $transient->checked[ $theme['settings-array-key'] ], $latest_version_trim, '<' ) ) {
+				continue;
+			}
+
+			/**
+			 * Get the package URL.
+			 */
+			if ( isset( $job ) ) {
+				$theme_package = "$gitlab_url/api/v4/projects/$repo/jobs/artifacts/$latest_version/download?job=$job&private_token=$access_token";
+			} else {
+				$theme_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
+			}
+
+			/**
+			 * Check the response.
+			 */
+			$response      = wp_safe_remote_get( $theme_package );
+			$response_code = wp_remote_retrieve_response_code( $response );
+			if ( is_wp_error( $response ) || 200 !== $response_code ) {
+				continue;
+			}
+
+			/**
+			 * Add data to response array.
+			 */
+			$transient->response[ $theme['settings-array-key'] ]['theme']       = $theme['settings-array-key'];
+			$transient->response[ $theme['settings-array-key'] ]['new_version'] = $latest_version_trim;
+			$transient->response[ $theme['settings-array-key'] ]['package']     = $theme_package;
+		}
 
 		return $transient;
 	}
