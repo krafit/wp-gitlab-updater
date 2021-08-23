@@ -19,18 +19,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-/**
- * Include UpdaterBase class.
- */
-require_once 'UpdaterBase.php';
-
-/**
- * Class PluginUpdater
- *
- * Class for handling plugin updates from GitLab repo.
- *
- * @package Leitsch\GitLabUpdater
- */
 class PluginUpdater extends UpdaterBase {
 	/**
 	 * Data of plugins which should get GitLab updates.
@@ -56,21 +44,15 @@ class PluginUpdater extends UpdaterBase {
 	 *
 	 */
 	public function __construct( $args = [] ) {
-		/**
-		 * Set plugin data.
-		 */
+		// Set plugin data.
 		$plugin_data = ( is_multisite() ? (array) get_site_option( "wp-gitlab-updater-plugins" ) : (array) get_option( "wp-gitlab-updater-plugins" ) );
 		if ( false !== $plugin_data ) {
 			$this->plugin_data = $plugin_data;
 		}
 
-		/**
-		 * Check if we have values.
-		 */
+		// Check if we have values.
 		if ( isset( $args['slug'] ) && isset( $args['plugin_base_name'] ) && isset( $args['access_token'] ) && isset( $args['gitlab_url'] ) && isset( $args['repo'] ) ) {
-			/**
-			 * Create array to insert them into plugin_data.
-			 */
+			// Create array to insert them into plugin_data.
 			$tmp_array = [
 				'settings-array-key' => $args['plugin_base_name'],
 				'slug'               => $args['slug'],
@@ -79,11 +61,9 @@ class PluginUpdater extends UpdaterBase {
 				'repo'               => str_replace( '/', '%2F', $args['repo'] ),
 			];
 
-			/**
-			 * Insert it.
-			 */
+			// Insert it.
 			$this->plugin_data[ $args['slug'] ] = $tmp_array;
-		} // End if().
+		}
 
 		/**
 		 * Hook into pre_set_site_transient_update_plugins to modify the update_plugins
@@ -165,21 +145,14 @@ class PluginUpdater extends UpdaterBase {
 		}
 
 		foreach ( $this->plugin_data as $plugin ) {
-			/**
-			 * Get data from array which we need to build package URL.
-			 */
+			// Get data from array which we need to build package URL.
 			$gitlab_url   = $plugin['gitlab-url'];
 			$repo         = $plugin['repo'];
 			$access_token = $plugin['access-token'];
 
-			/**
-			 * Get tag list from GitLab repo.
-			 */
+			// Get tag list from GitLab repo.
 			$request = $this->fetch_tags_from_repo( $gitlab_url, $repo, $access_token );
 
-			/**
-			 * Get response code of the request.
-			 */
 			$response_code = wp_remote_retrieve_response_code( $request );
 
 			/**
@@ -188,30 +161,21 @@ class PluginUpdater extends UpdaterBase {
 			 */
 			if ( is_wp_error( $request ) || 200 !== $response_code ) {
 				continue;
-			} else {
-				$response = wp_remote_retrieve_body( $request );
 			}
 
-			/**
-			 * Decode json.
-			 */
+			$response = wp_remote_retrieve_body( $request );
+
 			$data = json_decode( $response );
 
-			/**
-			 * Check if we have no tags and return the transient.
-			 */
+			// Check if we have no tags and return the transient.
 			if ( empty( $data ) ) {
 				continue;
 			}
 
-			/**
-			 * Get the latest tag.
-			 */
+			// Get the latest tag.
 			$latest_version = $data[0]->name;
 
-			/**
-			 * Check if new version is available.
-			 */
+			// Check if new version is available.
 			if ( ! isset( $transient->checked[ $plugin['settings-array-key'] ] ) ) {
 				continue;
 			}
@@ -220,31 +184,23 @@ class PluginUpdater extends UpdaterBase {
 				continue;
 			}
 
-			/**
-			 * Get the package URL.
-			 */
+			// Get the package URL.
 			$plugin_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
 
-			/**
-			 * Check the response.
-			 */
 			$response      = wp_safe_remote_get( $plugin_package );
 			$response_code = wp_remote_retrieve_response_code( $response );
 			if ( is_wp_error( $response ) || 200 !== $response_code ) {
 				continue;
 			}
 
-			/*
-			 * Build stdClass
-			 */
+			// Build stdClass
 			$info              = new \stdClass();
 			$info->slug        = $plugin['slug'];
 			$info->plugin      = $plugin['settings-array-key'];
 			$info->package     = $plugin_package;
 			$info->new_version = $latest_version;
-			/**
-			 * Add data to transient.
-			 */
+
+			// Add data to transient.
 			$transient->response[ $plugin['settings-array-key'] ] = $info;
 		}
 

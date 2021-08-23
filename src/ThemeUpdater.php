@@ -19,18 +19,6 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 }
 
-/**
- * Include UpdaterBase class.
- */
-require_once 'UpdaterBase.php';
-
-/**
- * Class ThemeUpdater
- *
- * Class for handling theme updates from GitLab repo.
- *
- * @package Leitsch\GitLabUpdater
- */
 class ThemeUpdater extends UpdaterBase {
 	/**
 	 * Data of themes which should get GitLab updates.
@@ -54,17 +42,13 @@ class ThemeUpdater extends UpdaterBase {
 	 * }
 	 */
 	public function __construct( $args = [] ) {
-		/**
-		 * Set theme data.
-		 */
+		 // Set theme data.
 		$theme_data = ( is_multisite() ? (array) get_site_option( "wp-gitlab-updater-themes" ) : (array) get_option( "wp-gitlab-updater-themes" ) );
 		if ( false !== $theme_data && false !== $theme_data[0] ) {
 			$this->theme_data = $theme_data;
 		}
 
-		/**
-		 * Check if we have values.
-		 */
+		// Check if we have values.
 		if ( isset( $args['slug'] ) && isset( $args['access_token'] ) && isset( $args['gitlab_url'] ) && isset( $args['repo'] ) ) {
 			/**
 			 * Create array to insert them into theme_data.
@@ -76,18 +60,13 @@ class ThemeUpdater extends UpdaterBase {
 				'repo'               => str_replace( '/', '%2F', $args['repo'] ),
 			];
 
-			/**
-			 * Add job name if it exists
-			 */
+			// Add job name if it exists
 			if ( array_key_exists( 'job', $args ) ) {
 				$tmp_array['job'] = $args['job'];
 			}
 
-			/**
-			 * Insert it.
-			 */
 			$this->theme_data[ $args['slug'] ] = $tmp_array;
-		} // End if().
+		}
 
 		/**
 		 * Hook into pre_set_site_transient_update_themes to modify the update_themes
@@ -125,9 +104,7 @@ class ThemeUpdater extends UpdaterBase {
 				 * than our GitLab URL.
 				 */
 				if ( array_key_exists( $theme_slug, $transient->response ) && false === strpos( $transient->response[ $theme_slug ]['package'], $theme['gitlab-url'] ) ) {
-					/**
-					 * Unset the response key for that theme.
-					 */
+					// Unset the response key for that theme.
 					unset( $transient->response[ $theme_slug ] );
 				}
 			}
@@ -145,9 +122,7 @@ class ThemeUpdater extends UpdaterBase {
 		 */
 		add_filter( 'upgrader_source_selection', function ( $source, $remote_source, $wp_upgrader, $args ) {
 			foreach ( $this->theme_data as $theme ) {
-				/**
-				 * Check if the currently updated theme matches our theme slug.
-				 */
+				// Check if the currently updated theme matches our theme slug.
 				if ( $args['theme'] === $theme['settings-array-key'] && false !== $theme ) {
 					$source = $this->filter_source_name( $source, $remote_source, $theme['settings-array-key'] );
 				}
@@ -170,9 +145,6 @@ class ThemeUpdater extends UpdaterBase {
 		}
 
 		foreach ( $this->theme_data as $theme ) {
-			/**
-			 * Get data from array.
-			 */
 			$gitlab_url   = $theme['gitlab-url'];
 			$repo         = $theme['repo'];
 			$access_token = $theme['access-token'];
@@ -181,14 +153,9 @@ class ThemeUpdater extends UpdaterBase {
 				$job = $theme['job'];
 			}
 
-			/**
-			 * Get tag list from GitLab repo.
-			 */
+			// Get tag list from GitLab repo.
 			$request = $this->fetch_tags_from_repo( $gitlab_url, $repo, $access_token );
 
-			/**
-			 * Get response code of the request.
-			 */
 			$response_code = wp_remote_retrieve_response_code( $request );
 
 			/**
@@ -197,35 +164,24 @@ class ThemeUpdater extends UpdaterBase {
 			 */
 			if ( is_wp_error( $request ) || 200 !== $response_code ) {
 				continue;
-			} else {
-				$response = wp_remote_retrieve_body( $request );
 			}
 
-			/**
-			 * Decode json.
-			 */
+			$response = wp_remote_retrieve_body( $request );
+
 			$data = json_decode( $response );
 
-			/**
-			 * Check if we have no tags and return the transient.
-			 */
+			// Check if we have no tags and return the transient.
 			if ( empty( $data ) ) {
 				continue;
 			}
 
-			/**
-			 * Get the latest tag.
-			 */
+			// Get the latest tag.
 			$latest_version = $data[0]->name;
 
-			/**
-			 * Remove optional v in tag.
-			 */
+			// Remove optional v in tag.
 			$latest_version_trim = str_replace('v', '', $latest_version);
 
-			/**
-			 * Check if new version is available.
-			 */
+			// Check if new version is available.
 			if ( ! isset( $transient->checked[ $theme['settings-array-key'] ] ) ) {
 				continue;
 			}
@@ -234,27 +190,21 @@ class ThemeUpdater extends UpdaterBase {
 				continue;
 			}
 
-			/**
-			 * Get the package URL.
-			 */
+		    // Get the package URL.
 			if ( isset( $job ) ) {
 				$theme_package = "$gitlab_url/api/v4/projects/$repo/jobs/artifacts/$latest_version/download?job=$job&private_token=$access_token";
 			} else {
 				$theme_package = "$gitlab_url/api/v4/projects/$repo/repository/archive.zip?sha=$latest_version&private_token=$access_token";
 			}
 
-			/**
-			 * Check the response.
-			 */
+			// Check the response.
 			$response      = wp_safe_remote_get( $theme_package );
 			$response_code = wp_remote_retrieve_response_code( $response );
 			if ( is_wp_error( $response ) || 200 !== $response_code ) {
 				continue;
 			}
 
-			/**
-			 * Add data to response array.
-			 */
+			// Add data to response array.
 			$transient->response[ $theme['settings-array-key'] ]['theme']       = $theme['settings-array-key'];
 			$transient->response[ $theme['settings-array-key'] ]['new_version'] = $latest_version_trim;
 			$transient->response[ $theme['settings-array-key'] ]['package']     = $theme_package;

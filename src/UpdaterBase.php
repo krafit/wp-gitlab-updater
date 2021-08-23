@@ -22,21 +22,6 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class UpdaterBase {
 	/**
-	 * UpdaterBase constructor.
-	 */
-	public function __construct() {
-		/**
-		 * Run plugin updater.
-		 */
-		new PluginUpdater();
-
-		/**
-		 * Run theme updater.
-		 */
-		new ThemeUpdater();
-	}
-
-	/**
 	 * Fetch data of latest version.
 	 *
 	 * @param string $gitlab_url   URL to GitLab install.
