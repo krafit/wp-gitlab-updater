@@ -22,7 +22,7 @@
  * GitHub Plugin URI: Moenus/wp-gitlab-updater
  */
 
-namespace Moenus\GitLabUpdater;
+namespace Leitsch\GitLabUpdater;
 
 /**
  * If this file is called directly, abort.

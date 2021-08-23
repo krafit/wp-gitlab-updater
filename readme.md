@@ -41,7 +41,7 @@ into a `wp-gitlab-updater` folder. After that, you can call it like that:
 /**
  * Init the theme updater.
  */
-new Moenus\GitLabUpdater\ThemeUpdater( [
+new Leitsch\GitLabUpdater\ThemeUpdater( [
     'slug' => 'SlugOfTheTheme', 
     'access_token' => 'YourGitLabAccessToken',
     'gitlab_url' => 'URLtoGitLabInstall',
@@ -66,7 +66,7 @@ require_once 'wp-gitlab-updater/plugin-updater.php';
 /**
  * Init the plugin updater with the plugin base name.
  */
-new Moenus\GitLabUpdater\PluginUpdater( [
+new Leitsch\GitLabUpdater\PluginUpdater( [
     'slug' => 'SlugOfPlugin', 
     'plugin_base_name' => 'BaseNameOfThePlugin', 
     'access_token' => 'YourGitLabAccessToken', 

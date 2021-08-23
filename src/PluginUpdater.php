@@ -6,11 +6,11 @@
  * the plugin repo. Project features like wiki and issues can be
  * hidden from external users.
  *
- * @package Moenus\GitLabUpdater
+ * @package Leitsch\GitLabUpdater
  * @author  Florian Brinkmann
  */
 
-namespace Moenus\GitLabUpdater;
+namespace Leitsch\GitLabUpdater;
 
 /**
  * If this file is called directly, abort.
@@ -29,7 +29,7 @@ require_once 'UpdaterBase.php';
  *
  * Class for handling plugin updates from GitLab repo.
  *
- * @package Moenus\GitLabUpdater
+ * @package Leitsch\GitLabUpdater
  */
 class PluginUpdater extends UpdaterBase {
 	/**

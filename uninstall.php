@@ -2,11 +2,11 @@
 /**
  * Uninstall routine
  *
- * @package Moenus\GitLabUpdater
+ * @package Leitsch\GitLabUpdater
  * @author  Florian Brinkmann
  */
 
-namespace Moenus\GitLabUpdater;
+namespace Leitsch\GitLabUpdater;
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	die;
